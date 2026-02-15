@@ -147,9 +147,9 @@ NEW_FILES=(
 
 # Modified files to patch via git diff | git apply --3way
 # Excludes: project.pbxproj (handled by Python script), SettingsView.swift (anchor-based),
+# LoopDataManager.swift (anchor-based — L&L Customizations modify this file heavily),
 # and Localizable.xcstrings (direct checkout — too large for 3-way merge on JSON)
 PATCH_FILES=(
-    "Loop/Managers/LoopDataManager.swift"
     "Loop/View Controllers/StatusTableViewController.swift"
     "Loop/View Models/AddEditFavoriteFoodViewModel.swift"
     "Loop/View Models/CarbEntryViewModel.swift"
@@ -222,8 +222,8 @@ validate_environment() {
         die "SettingsView.swift not found at expected path."
     fi
 
-    if ! grep -q 'ForEach(pluginMenuItems\.filter {\$0\.section == \.configuration})' "$settings_file"; then
-        die "Anchor not found in SettingsView.swift: ForEach(pluginMenuItems.filter {\$0.section == .configuration})
+    if ! grep -q 'Diabetes Treatment' "$settings_file"; then
+        die "Anchor not found in SettingsView.swift: Diabetes Treatment
   Your Loop version may be incompatible."
     fi
 
@@ -426,8 +426,10 @@ with open(settings_path, "r") as f:
 
 lines = content.split("\n")
 
-# ─── Anchor 1: Insert feature rows BEFORE the ForEach(pluginMenuItems.filter configuration) ───
-# This is inside configurationSection. We insert FoodFinder, LoopInsights, and AutoPresets rows.
+# ─── Anchor 1: Insert feature rows AFTER the Therapy Settings button ───
+# We anchor on "Diabetes Treatment" (the Therapy Settings descriptive text) so our
+# features appear right after Therapy Settings. If L&L Profiles is installed, it
+# inserts before the ForEach — so Profiles ends up BELOW our features.
 
 FEATURE_ROWS = """
             foodFinderSettingsRow
@@ -445,7 +447,7 @@ FEATURE_ROWS = """
             }
 """
 
-anchor1 = 'ForEach(pluginMenuItems.filter {$0.section == .configuration})'
+anchor1 = 'Diabetes Treatment'
 anchor1_idx = None
 for i, line in enumerate(lines):
     if anchor1 in line:
@@ -456,11 +458,12 @@ if anchor1_idx is None:
     print(f"ERROR: Anchor 1 not found: {anchor1}", file=sys.stderr)
     sys.exit(1)
 
-# Insert the feature rows BEFORE the ForEach line
+# Insert the feature rows AFTER the Therapy Settings descriptive text line
 feature_lines = FEATURE_ROWS.rstrip("\n").split("\n")
+insert_at = anchor1_idx + 2  # after the NavigationLink closing brace (line after "Diabetes Treatment")
 for j, fl in enumerate(feature_lines):
-    lines.insert(anchor1_idx + j, fl)
-print(f"  Inserted {len(feature_lines)} lines before ForEach anchor (line {anchor1_idx + 1})")
+    lines.insert(insert_at + j, fl)
+print(f"  Inserted {len(feature_lines)} lines after Therapy Settings (line {anchor1_idx + 1})")
 
 # ─── Anchor 2: Insert computed properties BEFORE "private var cgmChoices:" ───
 
@@ -479,18 +482,16 @@ COMPUTED_PROPS = """
     }
 
     private var loopInsightsSection: some View {
-        Section {
-            NavigationLink(destination: LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
-                LargeButton(action: {},
-                            includeArrow: false,
-                            imageView: Image(systemName: "brain.head.profile")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
-                                .frame(width: 30),
-                            label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
-                            descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
-            }
+        NavigationLink(destination: LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "brain.head.profile")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                            .frame(width: 30),
+                        label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
+                        descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
         }
     }
 
@@ -524,6 +525,126 @@ PYTHON_SCRIPT
         success "SettingsView.swift patched with anchor-based insertion"
     else
         error "Failed to patch SettingsView.swift"
+        return 1
+    fi
+}
+
+# ─── Phase 6b: Patch LoopDataManager.swift (Anchor-Based) ────────────────────
+#
+# L&L Customizations heavily modify LoopDataManager.swift (Negative Insulin Damper,
+# function signature changes, etc.), so git apply --3way fails silently.
+# Instead, we use anchor-based insertion like SettingsView.swift.
+
+patch_loop_data_manager() {
+    header "Phase 6b: Patching LoopDataManager.swift (anchor-based)"
+
+    local ldm_file="Loop/Loop/Managers/LoopDataManager.swift"
+
+    if [[ ! -f "$ldm_file" ]]; then
+        die "LoopDataManager.swift not found at: $ldm_file"
+    fi
+
+    # Skip if already patched
+    if grep -q "AutoPresetsCoordinator" "$ldm_file"; then
+        info "LoopDataManager.swift already contains AutoPresets code — skipping."
+        return 0
+    fi
+
+    python3 - "$ldm_file" << 'PYTHON_SCRIPT'
+import sys
+
+ldm_path = sys.argv[1]
+
+with open(ldm_path, "r") as f:
+    content = f.read()
+
+lines = content.split("\n")
+
+# ─── Anchor 1: Insert delegate setup after "self.trustedTimeOffset = trustedTimeOffset" ───
+# This is in the init method. The delegate line goes right after this assignment,
+# before the LiveActivity setup.
+
+DELEGATE_SETUP = """\
+
+        // Set up AutoPresets coordinator delegate
+        AutoPresetsCoordinator.shared.delegate = self
+"""
+
+anchor1 = "self.trustedTimeOffset = trustedTimeOffset"
+anchor1_idx = None
+for i, line in enumerate(lines):
+    if anchor1 in line:
+        anchor1_idx = i
+        break
+
+if anchor1_idx is None:
+    print(f"ERROR: Anchor not found: {anchor1}", file=sys.stderr)
+    sys.exit(1)
+
+delegate_lines = DELEGATE_SETUP.rstrip("\n").split("\n")
+insert_at = anchor1_idx + 1
+for j, dl in enumerate(delegate_lines):
+    lines.insert(insert_at + j, dl)
+print(f"  Inserted delegate setup ({len(delegate_lines)} lines) after line {anchor1_idx + 1}")
+
+# ─── Anchor 2: Append AutoPresetsDelegate extension at end of file ───
+# We find the very last closing brace of the file and append after it.
+
+DELEGATE_EXTENSION = """
+// MARK: - AutoPresetsDelegate
+
+extension LoopDataManager: AutoPresetsDelegate {
+
+    func autoPresets(_ coordinator: AutoPresetsCoordinator,
+                     shouldActivatePreset preset: TemporaryScheduleOverridePreset) {
+        logger.default("AutoPresets activating preset: %{public}@", preset.name)
+
+        mutateSettings { settings in
+            settings.scheduleOverride = preset.createOverride(enactTrigger: .local)
+        }
+    }
+
+    func autoPresets(_ coordinator: AutoPresetsCoordinator,
+                     shouldDeactivatePreset preset: TemporaryScheduleOverridePreset) {
+        guard let currentOverride = settings.scheduleOverride,
+              case let .preset(currentPreset) = currentOverride.context,
+              currentPreset.id == preset.id
+        else {
+            return
+        }
+
+        logger.default("AutoPresets deactivating preset: %{public}@", preset.name)
+
+        mutateSettings { settings in
+            settings.scheduleOverride = nil
+        }
+    }
+
+    func autoPresetsAvailablePresets(_ coordinator: AutoPresetsCoordinator) -> [TemporaryScheduleOverridePreset] {
+        settings.overridePresets
+    }
+
+    func autoPresetsCurrentOverride(_ coordinator: AutoPresetsCoordinator) -> TemporaryScheduleOverride? {
+        settings.scheduleOverride
+    }
+}
+"""
+
+extension_lines = DELEGATE_EXTENSION.split("\n")
+lines.extend(extension_lines)
+print(f"  Appended AutoPresetsDelegate extension ({len(extension_lines)} lines) at end of file")
+
+# Write back
+with open(ldm_path, "w") as f:
+    f.write("\n".join(lines))
+
+print("  LoopDataManager.swift patched successfully.")
+PYTHON_SCRIPT
+
+    if [[ $? -eq 0 ]]; then
+        success "LoopDataManager.swift patched with AutoPresets delegate"
+    else
+        error "Failed to patch LoopDataManager.swift"
         return 1
     fi
 }
@@ -669,7 +790,7 @@ cleanup() {
     echo -e "  ${BOLD}Next steps:${NC}"
     echo "  1. Open LoopWorkspace.xcworkspace in Xcode"
     echo "  2. Build and run (Cmd+R)"
-    echo "  3. In the Loop app: Settings → enable FoodFinder / LoopInsights"
+    echo "  3. In Loop > Settings > Enable AutoPresets / FoodFinder / LoopInsights"
     echo "  4. Enter your AI API key in FoodFinder Settings"
     echo ""
     echo -e "  ${BOLD}To uninstall:${NC}"
@@ -774,6 +895,7 @@ main() {
     install_new_files
     patch_modified_files
     patch_settings_view
+    patch_loop_data_manager
     update_pbxproj
     validate_installation
     cleanup
