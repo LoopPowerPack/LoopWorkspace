@@ -442,16 +442,14 @@ FEATURE_ROWS = """
 
             loopInsightsSection
 
-            if AutoPresets_FeatureFlags.isEnabled {
-                NavigationLink(destination: AutoPresets_SettingsView()) {
-                    LargeButton(
-                        action: {},
-                        includeArrow: false,
-                        imageView: AutoPresets_IconView(),
-                        label: NSLocalizedString("AutoPresets", comment: "Title text for button to AutoPresets Settings"),
-                        descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
-                    )
-                }
+            NavigationLink(destination: AutoPresets_SettingsView()) {
+                LargeButton(
+                    action: {},
+                    includeArrow: false,
+                    imageView: AutoPresets_IconView(),
+                    label: NSLocalizedString("AutoPresets", comment: "Title text for button to AutoPresets Settings"),
+                    descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
+                )
             }
 """
 
