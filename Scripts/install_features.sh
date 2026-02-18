@@ -38,18 +38,18 @@ NEW_FILES=(
     "Documentation/LoopInsights/LoopInsights_README.md"
 
     # AutoPresets — Managers
-    "Loop/Managers/ActivityDetectionManager.swift"
-    "Loop/Managers/AutoPresetsCoordinator.swift"
-    "Loop/Managers/AutoPresetsDelegate.swift"
-    "Loop/Managers/AutoPresetsLogger.swift"
-    "Loop/Managers/AutoPresetsStorage.swift"
+    "Loop/Managers/AutoPresets/AutoPresets_ActivityDetectionManager.swift"
+    "Loop/Managers/AutoPresets/AutoPresets_Coordinator.swift"
+    "Loop/Managers/AutoPresets/AutoPresets_Delegate.swift"
+    "Loop/Managers/AutoPresets/AutoPresets_Logger.swift"
+    "Loop/Managers/AutoPresets/AutoPresets_Storage.swift"
 
     # LoopInsights — Managers
     "Loop/Managers/LoopInsights/LoopInsights_BackgroundMonitor.swift"
     "Loop/Managers/LoopInsights/LoopInsights_Coordinator.swift"
 
     # AutoPresets — Models
-    "Loop/Models/AutoPresetsModels.swift"
+    "Loop/Models/AutoPresets/AutoPresets_Models.swift"
 
     # FoodFinder — Models
     "Loop/Models/FoodFinder/FoodFinder_AnalysisRecord.swift"
@@ -110,7 +110,10 @@ NEW_FILES=(
     "Loop/View Models/LoopInsights/LoopInsights_DashboardViewModel.swift"
 
     # AutoPresets — Views
-    "Loop/Views/AutoPresetsSettingsView.swift"
+    "Loop/Views/AutoPresets/AutoPresets_SettingsView.swift"
+
+    # AutoPresets — Resources
+    "Loop/Resources/AutoPresets/AutoPresets_FeatureFlags.swift"
 
     # FoodFinder — Views
     "Loop/Views/FoodFinder/FoodFinder_AICameraView.swift"
@@ -208,7 +211,7 @@ validate_environment() {
     local sample_files=(
         "Loop/Loop/Views/FoodFinder/FoodFinder_EntryPoint.swift"
         "Loop/Loop/Views/LoopInsights/LoopInsights_DashboardView.swift"
-        "Loop/Loop/Views/AutoPresetsSettingsView.swift"
+        "Loop/Loop/Views/AutoPresets/AutoPresets_SettingsView.swift"
     )
     for f in "${sample_files[@]}"; do
         if [[ -f "$f" ]]; then
@@ -438,14 +441,16 @@ FEATURE_ROWS = """
 
             loopInsightsSection
 
-            NavigationLink(destination: AutoPresetsSettingsView()) {
-                LargeButton(
-                    action: {},
-                    includeArrow: false,
-                    imageView: AutoPresetsIconView(),
-                    label: NSLocalizedString("AutoPresets", comment: "Title text for button to AutoPresets Settings"),
-                    descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
-                )
+            if AutoPresets_FeatureFlags.isEnabled {
+                NavigationLink(destination: AutoPresets_SettingsView()) {
+                    LargeButton(
+                        action: {},
+                        includeArrow: false,
+                        imageView: AutoPresets_IconView(),
+                        label: NSLocalizedString("AutoPresets", comment: "Title text for button to AutoPresets Settings"),
+                        descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
+                    )
+                }
             }
 """
 
@@ -547,7 +552,7 @@ patch_loop_data_manager() {
     fi
 
     # Skip if already patched
-    if grep -q "AutoPresetsCoordinator" "$ldm_file"; then
+    if grep -q "AutoPresets_Coordinator" "$ldm_file"; then
         info "LoopDataManager.swift already contains AutoPresets code — skipping."
         return 0
     fi
@@ -569,7 +574,7 @@ lines = content.split("\n")
 DELEGATE_SETUP = """\
 
         // Set up AutoPresets coordinator delegate
-        AutoPresetsCoordinator.shared.delegate = self
+        AutoPresets_Coordinator.shared.delegate = self
 """
 
 anchor1 = "self.trustedTimeOffset = trustedTimeOffset"
@@ -593,11 +598,11 @@ print(f"  Inserted delegate setup ({len(delegate_lines)} lines) after line {anch
 # We find the very last closing brace of the file and append after it.
 
 DELEGATE_EXTENSION = """
-// MARK: - AutoPresetsDelegate
+// MARK: - AutoPresets_Delegate
 
-extension LoopDataManager: AutoPresetsDelegate {
+extension LoopDataManager: AutoPresets_Delegate {
 
-    func autoPresets(_ coordinator: AutoPresetsCoordinator,
+    func autoPresets(_ coordinator: AutoPresets_Coordinator,
                      shouldActivatePreset preset: TemporaryScheduleOverridePreset) {
         logger.default("AutoPresets activating preset: %{public}@", preset.name)
 
@@ -606,7 +611,7 @@ extension LoopDataManager: AutoPresetsDelegate {
         }
     }
 
-    func autoPresets(_ coordinator: AutoPresetsCoordinator,
+    func autoPresets(_ coordinator: AutoPresets_Coordinator,
                      shouldDeactivatePreset preset: TemporaryScheduleOverridePreset) {
         guard let currentOverride = settings.scheduleOverride,
               case let .preset(currentPreset) = currentOverride.context,
@@ -622,11 +627,11 @@ extension LoopDataManager: AutoPresetsDelegate {
         }
     }
 
-    func autoPresetsAvailablePresets(_ coordinator: AutoPresetsCoordinator) -> [TemporaryScheduleOverridePreset] {
+    func autoPresetsAvailablePresets(_ coordinator: AutoPresets_Coordinator) -> [TemporaryScheduleOverridePreset] {
         settings.overridePresets
     }
 
-    func autoPresetsCurrentOverride(_ coordinator: AutoPresetsCoordinator) -> TemporaryScheduleOverride? {
+    func autoPresetsCurrentOverride(_ coordinator: AutoPresets_Coordinator) -> TemporaryScheduleOverride? {
         settings.scheduleOverride
     }
 }
@@ -634,7 +639,7 @@ extension LoopDataManager: AutoPresetsDelegate {
 
 extension_lines = DELEGATE_EXTENSION.split("\n")
 lines.extend(extension_lines)
-print(f"  Appended AutoPresetsDelegate extension ({len(extension_lines)} lines) at end of file")
+print(f"  Appended AutoPresets_Delegate extension ({len(extension_lines)} lines) at end of file")
 
 # Write back
 with open(ldm_path, "w") as f:
@@ -725,8 +730,8 @@ validate_installation() {
     local check_files=(
         "Loop/Loop/Views/FoodFinder/FoodFinder_EntryPoint.swift"
         "Loop/Loop/Views/LoopInsights/LoopInsights_DashboardView.swift"
-        "Loop/Loop/Views/AutoPresetsSettingsView.swift"
-        "Loop/Loop/Managers/AutoPresetsCoordinator.swift"
+        "Loop/Loop/Views/AutoPresets/AutoPresets_SettingsView.swift"
+        "Loop/Loop/Managers/AutoPresets/AutoPresets_Coordinator.swift"
         "Loop/Loop/Services/FoodFinder/FoodFinder_AIAnalysis.swift"
         "Loop/Loop/Services/LoopInsights/LoopInsights_DataAggregator.swift"
         "Loop/Loop/Resources/FoodFinder/FoodFinder_FeatureFlags.swift"
@@ -760,7 +765,7 @@ validate_installation() {
         warn "SettingsView.swift is missing LoopInsights section"
     fi
 
-    if grep -q "AutoPresetsSettingsView" "$settings_file"; then
+    if grep -q "AutoPresets_SettingsView" "$settings_file"; then
         success "SettingsView.swift contains AutoPresets row"
     else
         warn "SettingsView.swift is missing AutoPresets row"
@@ -824,11 +829,11 @@ rollback() {
 
     # Clean up empty directories
     local feature_dirs=(
-        "Loop/Views/FoodFinder" "Loop/Views/LoopInsights"
-        "Loop/Models/FoodFinder" "Loop/Models/LoopInsights"
+        "Loop/Views/FoodFinder" "Loop/Views/LoopInsights" "Loop/Views/AutoPresets"
+        "Loop/Models/FoodFinder" "Loop/Models/LoopInsights" "Loop/Models/AutoPresets"
         "Loop/Services/FoodFinder" "Loop/Services/LoopInsights"
-        "Loop/Resources/FoodFinder" "Loop/Resources/LoopInsights/TestData" "Loop/Resources/LoopInsights"
-        "Loop/Managers/LoopInsights"
+        "Loop/Resources/FoodFinder" "Loop/Resources/LoopInsights/TestData" "Loop/Resources/LoopInsights" "Loop/Resources/AutoPresets"
+        "Loop/Managers/LoopInsights" "Loop/Managers/AutoPresets"
         "Loop/View Models/FoodFinder" "Loop/View Models/LoopInsights"
         "LoopTests/FoodFinder" "LoopTests/LoopInsights"
         "Documentation/FoodFinder" "Documentation/LoopInsights"
@@ -846,11 +851,11 @@ rollback() {
     git reset HEAD -- . 2>/dev/null || true
     git checkout HEAD -- . 2>/dev/null || true
     # Remove any remaining untracked feature files
-    git clean -fd -- Loop/Views/FoodFinder Loop/Views/LoopInsights \
-        Loop/Models/FoodFinder Loop/Models/LoopInsights \
+    git clean -fd -- Loop/Views/FoodFinder Loop/Views/LoopInsights Loop/Views/AutoPresets \
+        Loop/Models/FoodFinder Loop/Models/LoopInsights Loop/Models/AutoPresets \
         Loop/Services/FoodFinder Loop/Services/LoopInsights \
-        Loop/Resources/FoodFinder Loop/Resources/LoopInsights \
-        Loop/Managers/LoopInsights \
+        Loop/Resources/FoodFinder Loop/Resources/LoopInsights Loop/Resources/AutoPresets \
+        Loop/Managers/LoopInsights Loop/Managers/AutoPresets \
         "Loop/View Models/FoodFinder" "Loop/View Models/LoopInsights" \
         LoopTests/FoodFinder LoopTests/LoopInsights \
         Documentation/FoodFinder Documentation/LoopInsights \

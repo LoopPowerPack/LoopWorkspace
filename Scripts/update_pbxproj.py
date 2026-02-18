@@ -26,14 +26,21 @@ def make_uuid(name: str) -> str:
 # parent_group_key maps to a group in the project that this file belongs under.
 
 SOURCE_FILES = [
-    # ── AutoPresets ──
-    ("Managers/ActivityDetectionManager.swift",      "ActivityDetectionManager.swift",      "Managers"),
-    ("Managers/AutoPresetsCoordinator.swift",        "AutoPresetsCoordinator.swift",        "Managers"),
-    ("Managers/AutoPresetsDelegate.swift",           "AutoPresetsDelegate.swift",           "Managers"),
-    ("Managers/AutoPresetsLogger.swift",             "AutoPresetsLogger.swift",             "Managers"),
-    ("Managers/AutoPresetsStorage.swift",            "AutoPresetsStorage.swift",            "Managers"),
-    ("Models/AutoPresetsModels.swift",               "AutoPresetsModels.swift",             "Models"),
-    ("Views/AutoPresetsSettingsView.swift",          "AutoPresetsSettingsView.swift",       "Views"),
+    # ── AutoPresets — Managers ──
+    ("Managers/AutoPresets/AutoPresets_ActivityDetectionManager.swift", "AutoPresets_ActivityDetectionManager.swift", "Managers/AutoPresets"),
+    ("Managers/AutoPresets/AutoPresets_Coordinator.swift",             "AutoPresets_Coordinator.swift",             "Managers/AutoPresets"),
+    ("Managers/AutoPresets/AutoPresets_Delegate.swift",                "AutoPresets_Delegate.swift",                "Managers/AutoPresets"),
+    ("Managers/AutoPresets/AutoPresets_Logger.swift",                  "AutoPresets_Logger.swift",                  "Managers/AutoPresets"),
+    ("Managers/AutoPresets/AutoPresets_Storage.swift",                 "AutoPresets_Storage.swift",                 "Managers/AutoPresets"),
+
+    # ── AutoPresets — Models ──
+    ("Models/AutoPresets/AutoPresets_Models.swift",                    "AutoPresets_Models.swift",                  "Models/AutoPresets"),
+
+    # ── AutoPresets — Resources ──
+    ("Resources/AutoPresets/AutoPresets_FeatureFlags.swift",           "AutoPresets_FeatureFlags.swift",            "Resources/AutoPresets"),
+
+    # ── AutoPresets — Views ──
+    ("Views/AutoPresets/AutoPresets_SettingsView.swift",               "AutoPresets_SettingsView.swift",            "Views/AutoPresets"),
 
     # ── FoodFinder — Models ──
     ("Models/FoodFinder/FoodFinder_AnalysisRecord.swift",   "FoodFinder_AnalysisRecord.swift",   "Models/FoodFinder"),
@@ -133,8 +140,11 @@ TEST_FILES = [
 
 SUBGROUPS = [
     # Feature subgroups under existing top-level groups
+    ("Managers/AutoPresets",    "AutoPresets",   "AutoPresets",   "Managers"),
+    ("Models/AutoPresets",      "AutoPresets",   "AutoPresets",   "Models"),
     ("Models/FoodFinder",       "FoodFinder",    "FoodFinder",    "Models"),
     ("Models/LoopInsights",     "LoopInsights",  "LoopInsights",  "Models"),
+    ("Views/AutoPresets",       "AutoPresets",   "AutoPresets",   "Views"),
     ("Views/FoodFinder",        "FoodFinder",    "FoodFinder",    "Views"),
     ("Views/LoopInsights",      "LoopInsights",  "LoopInsights",  "Views"),
     ("View Models/FoodFinder",  "FoodFinder",    "FoodFinder",    "View Models"),
@@ -146,6 +156,7 @@ SUBGROUPS = [
     ("Services/FoodFinder",     "FoodFinder",    "FoodFinder",    "Services"),
     ("Services/LoopInsights",   "LoopInsights",  "LoopInsights",  "Services"),
     ("Resources",               "Resources",     "Resources",     "Loop"),
+    ("Resources/AutoPresets",   "AutoPresets",   "AutoPresets",   "Resources"),
     ("Resources/FoodFinder",    "FoodFinder",    "FoodFinder",    "Resources"),
     ("Resources/LoopInsights",  "LoopInsights",  "LoopInsights",  "Resources"),
 
@@ -531,14 +542,6 @@ def main():
         # For newly created parent groups, children were already added in step 3
         if gparent in known_groups:
             content = add_child_to_group(content, parent_uuid, child_uuid, gname)
-
-    # Also add AutoPresets files directly to their parent groups (no subgroup for these)
-    for path, name, gkey in SOURCE_FILES:
-        # Files in top-level groups (AutoPresets files go directly into Managers/Models/Views)
-        if gkey in known_groups and "/" not in gkey:
-            fr = fileref_uuid(name)
-            parent_uuid = known_groups[gkey]
-            content = add_child_to_group(content, parent_uuid, fr, name)
 
     # =========================================================================
     # 5. Add files to PBXSourcesBuildPhase
