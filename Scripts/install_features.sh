@@ -80,6 +80,7 @@ NEW_FILES=(
     "Loop/Services/FoodFinder/FoodFinder_EmojiProvider.swift"
     "Loop/Services/FoodFinder/FoodFinder_ImageDownloader.swift"
     "Loop/Services/FoodFinder/FoodFinder_ImageStore.swift"
+    "Loop/Services/FoodFinder/FoodFinder_LocationService.swift"
     "Loop/Services/FoodFinder/FoodFinder_OpenFoodFactsService.swift"
     "Loop/Services/FoodFinder/FoodFinder_ScannerService.swift"
     "Loop/Services/FoodFinder/FoodFinder_SearchRouter.swift"

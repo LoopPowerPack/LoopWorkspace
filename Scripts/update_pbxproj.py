@@ -59,6 +59,7 @@ SOURCE_FILES = [
     ("Services/FoodFinder/FoodFinder_EmojiProvider.swift",     "FoodFinder_EmojiProvider.swift",     "Services/FoodFinder"),
     ("Services/FoodFinder/FoodFinder_ImageDownloader.swift",   "FoodFinder_ImageDownloader.swift",   "Services/FoodFinder"),
     ("Services/FoodFinder/FoodFinder_ImageStore.swift",        "FoodFinder_ImageStore.swift",        "Services/FoodFinder"),
+    ("Services/FoodFinder/FoodFinder_LocationService.swift",   "FoodFinder_LocationService.swift",   "Services/FoodFinder"),
     ("Services/FoodFinder/FoodFinder_OpenFoodFactsService.swift", "FoodFinder_OpenFoodFactsService.swift", "Services/FoodFinder"),
     ("Services/FoodFinder/FoodFinder_ScannerService.swift",    "FoodFinder_ScannerService.swift",    "Services/FoodFinder"),
     ("Services/FoodFinder/FoodFinder_SearchRouter.swift",      "FoodFinder_SearchRouter.swift",      "Services/FoodFinder"),
