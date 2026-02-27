@@ -471,7 +471,7 @@ lines = content.split("\n")
 # inserts before the ForEach — so Profiles ends up BELOW our features.
 
 FEATURE_ROWS = """
-            NavigationLink(destination: AutoPresets_SettingsView()) {
+            NavigationLink(destination: AutoPresets_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
                 LargeButton(
                     action: {},
                     includeArrow: false,
