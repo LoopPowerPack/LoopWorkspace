@@ -99,6 +99,7 @@ NEW_FILES=(
     "Loop/Services/LoopInsights/LoopInsights_AlcoholTracker.swift"
     "Loop/Services/LoopInsights/LoopInsights_CaffeineTracker.swift"
     "Loop/Services/LoopInsights/LoopInsights_VoiceService.swift"
+    "Loop/Services/LoopInsights/LoopInsights_BackfillDetector.swift"
     "Loop/Services/LoopInsights/LoopInsights_DataAggregator.swift"
     "Loop/Services/LoopInsights/LoopInsights_FoodResponseAnalyzer.swift"
     "Loop/Services/LoopInsights/LoopInsights_GoalStore.swift"
