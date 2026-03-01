@@ -160,6 +160,8 @@ SOURCE_FILES = [
     ("Services/DataLayer/DataLayer_EventStore.swift",              "DataLayer_EventStore.swift",              "Services/DataLayer"),
     ("Services/DataLayer/DataLayer_EventCollector.swift",          "DataLayer_EventCollector.swift",          "Services/DataLayer"),
     ("Services/DataLayer/DataLayer_SyncService.swift",             "DataLayer_SyncService.swift",             "Services/DataLayer"),
+    ("Services/DataLayer/DataLayer_ReportGenerator.swift",        "DataLayer_ReportGenerator.swift",         "Services/DataLayer"),
+    ("Services/DataLayer/DataLayer_ProviderProtocol.swift",       "DataLayer_ProviderProtocol.swift",        "Services/DataLayer"),
 
     # ── DataLayer — Views ──
     ("Views/DataLayer/DataLayer_ConsentView.swift",                "DataLayer_ConsentView.swift",             "Views/DataLayer"),

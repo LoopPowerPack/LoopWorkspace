@@ -175,6 +175,8 @@ NEW_FILES=(
     "Loop/Services/DataLayer/DataLayer_EventStore.swift"
     "Loop/Services/DataLayer/DataLayer_EventCollector.swift"
     "Loop/Services/DataLayer/DataLayer_SyncService.swift"
+    "Loop/Services/DataLayer/DataLayer_ReportGenerator.swift"
+    "Loop/Services/DataLayer/DataLayer_ProviderProtocol.swift"
 
     # DataLayer — Views
     "Loop/Views/DataLayer/DataLayer_ConsentView.swift"
