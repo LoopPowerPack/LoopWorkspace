@@ -92,6 +92,7 @@ SOURCE_FILES = [
 
     # ── LoopInsights — Models ──
     ("Models/LoopInsights/LoopInsights_Models.swift",           "LoopInsights_Models.swift",           "Models/LoopInsights"),
+    ("Models/LoopInsights/LoopInsights_MFPModels.swift",        "LoopInsights_MFPModels.swift",        "Models/LoopInsights"),
     ("Models/LoopInsights/LoopInsights_Phase5Models.swift",     "LoopInsights_Phase5Models.swift",     "Models/LoopInsights"),
     ("Models/LoopInsights/LoopInsights_SuggestionRecord.swift", "LoopInsights_SuggestionRecord.swift", "Models/LoopInsights"),
 
@@ -116,6 +117,7 @@ SOURCE_FILES = [
     ("Services/LoopInsights/LoopInsights_SuggestionStore.swift",    "LoopInsights_SuggestionStore.swift",    "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_TestDataProvider.swift",   "LoopInsights_TestDataProvider.swift",   "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_MealDebriefService.swift",  "LoopInsights_MealDebriefService.swift",  "Services/LoopInsights"),
+    ("Services/LoopInsights/LoopInsights_MFPImporter.swift",         "LoopInsights_MFPImporter.swift",         "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_PreMealAdvisorService.swift", "LoopInsights_PreMealAdvisorService.swift", "Services/LoopInsights"),
 
     # ── LoopInsights — View Models ──

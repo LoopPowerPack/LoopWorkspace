@@ -62,6 +62,7 @@ NEW_FILES=(
 
     # LoopInsights — Models
     "Loop/Models/LoopInsights/LoopInsights_Models.swift"
+    "Loop/Models/LoopInsights/LoopInsights_MFPModels.swift"
     "Loop/Models/LoopInsights/LoopInsights_Phase5Models.swift"
     "Loop/Models/LoopInsights/LoopInsights_SuggestionRecord.swift"
 
@@ -110,6 +111,7 @@ NEW_FILES=(
     "Loop/Services/LoopInsights/LoopInsights_SuggestionStore.swift"
     "Loop/Services/LoopInsights/LoopInsights_TestDataProvider.swift"
     "Loop/Services/LoopInsights/LoopInsights_MealDebriefService.swift"
+    "Loop/Services/LoopInsights/LoopInsights_MFPImporter.swift"
     "Loop/Services/LoopInsights/LoopInsights_PreMealAdvisorService.swift"
 
     # FoodFinder — View Models
