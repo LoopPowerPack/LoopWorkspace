@@ -104,6 +104,7 @@ SOURCE_FILES = [
     ("Services/LoopInsights/LoopInsights_AIAnalysis.swift",         "LoopInsights_AIAnalysis.swift",         "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_AIServiceAdapter.swift",   "LoopInsights_AIServiceAdapter.swift",   "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_AlcoholTracker.swift",     "LoopInsights_AlcoholTracker.swift",     "Services/LoopInsights"),
+    ("Services/LoopInsights/LoopInsights_ChatHistoryStore.swift",  "LoopInsights_ChatHistoryStore.swift",  "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_CaffeineTracker.swift",    "LoopInsights_CaffeineTracker.swift",    "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_VoiceService.swift",       "LoopInsights_VoiceService.swift",       "Services/LoopInsights"),
     ("Services/LoopInsights/LoopInsights_BackfillDetector.swift",  "LoopInsights_BackfillDetector.swift",  "Services/LoopInsights"),
@@ -128,6 +129,7 @@ SOURCE_FILES = [
     # ── LoopInsights — Views ──
     ("Views/LoopInsights/LoopInsights_AGPChartView.swift",         "LoopInsights_AGPChartView.swift",         "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_AlcoholLogView.swift",     "LoopInsights_AlcoholLogView.swift",     "Views/LoopInsights"),
+    ("Views/LoopInsights/LoopInsights_ChatHistoryView.swift",    "LoopInsights_ChatHistoryView.swift",    "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_CaffeineLogView.swift",     "LoopInsights_CaffeineLogView.swift",     "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_ChatView.swift",             "LoopInsights_ChatView.swift",             "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_DashboardView.swift",        "LoopInsights_DashboardView.swift",        "Views/LoopInsights"),
