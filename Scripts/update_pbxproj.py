@@ -78,6 +78,7 @@ SOURCE_FILES = [
     # ── FoodFinder — Views ──
     ("Views/FoodFinder/FoodFinder_CarbTrackingDashboard.swift", "FoodFinder_CarbTrackingDashboard.swift", "Views/FoodFinder"),
     ("Views/FoodFinder/FoodFinder_AICameraView.swift",      "FoodFinder_AICameraView.swift",      "Views/FoodFinder"),
+    ("Views/FoodFinder/FoodFinder_ImageCropView.swift",    "FoodFinder_ImageCropView.swift",    "Views/FoodFinder"),
     ("Views/FoodFinder/FoodFinder_EntryPoint.swift",        "FoodFinder_EntryPoint.swift",        "Views/FoodFinder"),
     ("Views/FoodFinder/FoodFinder_FavoritesHelpers.swift",  "FoodFinder_FavoritesHelpers.swift",  "Views/FoodFinder"),
     ("Views/FoodFinder/FoodFinder_ScannerView.swift",       "FoodFinder_ScannerView.swift",       "Views/FoodFinder"),

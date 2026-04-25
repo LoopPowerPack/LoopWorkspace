@@ -140,6 +140,7 @@ NEW_FILES=(
     # FoodFinder — Views
     "Loop/Views/FoodFinder/FoodFinder_CarbTrackingDashboard.swift"
     "Loop/Views/FoodFinder/FoodFinder_AICameraView.swift"
+    "Loop/Views/FoodFinder/FoodFinder_ImageCropView.swift"
     "Loop/Views/FoodFinder/FoodFinder_EntryPoint.swift"
     "Loop/Views/FoodFinder/FoodFinder_FavoritesHelpers.swift"
     "Loop/Views/FoodFinder/FoodFinder_ScannerView.swift"
