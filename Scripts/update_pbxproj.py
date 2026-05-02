@@ -132,6 +132,7 @@ SOURCE_FILES = [
     ("Views/LoopInsights/LoopInsights_AGPChartView.swift",         "LoopInsights_AGPChartView.swift",         "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_AlcoholLogView.swift",     "LoopInsights_AlcoholLogView.swift",     "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_BehaviorInsightsView.swift", "LoopInsights_BehaviorInsightsView.swift", "Views/LoopInsights"),
+    ("Views/LoopInsights/LoopInsights_EndoReportView.swift",     "LoopInsights_EndoReportView.swift",     "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_ChatHistoryView.swift",    "LoopInsights_ChatHistoryView.swift",    "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_CaffeineLogView.swift",     "LoopInsights_CaffeineLogView.swift",     "Views/LoopInsights"),
     ("Views/LoopInsights/LoopInsights_ChatView.swift",             "LoopInsights_ChatView.swift",             "Views/LoopInsights"),

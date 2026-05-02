@@ -154,6 +154,7 @@ NEW_FILES=(
     "Loop/Views/LoopInsights/LoopInsights_AGPChartView.swift"
     "Loop/Views/LoopInsights/LoopInsights_AlcoholLogView.swift"
     "Loop/Views/LoopInsights/LoopInsights_BehaviorInsightsView.swift"
+    "Loop/Views/LoopInsights/LoopInsights_EndoReportView.swift"
     "Loop/Views/LoopInsights/LoopInsights_ChatHistoryView.swift"
     "Loop/Views/LoopInsights/LoopInsights_CaffeineLogView.swift"
     "Loop/Views/LoopInsights/LoopInsights_ChatView.swift"
