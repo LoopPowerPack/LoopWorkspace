@@ -53,6 +53,9 @@ NEW_FILES=(
     "Loop/Managers/AutoPresets/AutoPresets_Logger.swift"
     "Loop/Managers/AutoPresets/AutoPresets_Storage.swift"
 
+    # GraphDetailView — Managers
+    "Loop/Managers/GraphDetailViewModel.swift"
+
     # LoopInsights — Managers
     "Loop/Managers/LoopInsights/LoopInsights_BackgroundMonitor.swift"
     "Loop/Managers/LoopInsights/LoopInsights_Coordinator.swift"
@@ -142,6 +145,9 @@ NEW_FILES=(
 
     # AutoPresets — Resources
     "Loop/Resources/AutoPresets/AutoPresets_FeatureFlags.swift"
+
+    # GraphDetailView — Views
+    "Loop/Views/GraphDetailView.swift"
 
     # FoodFinder — Views
     "Loop/Views/FoodFinder/FoodFinder_CarbTrackingDashboard.swift"

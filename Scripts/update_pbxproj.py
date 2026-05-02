@@ -26,6 +26,10 @@ def make_uuid(name: str) -> str:
 # parent_group_key maps to a group in the project that this file belongs under.
 
 SOURCE_FILES = [
+    # ── GraphDetailView ──
+    ("Managers/GraphDetailViewModel.swift",  "GraphDetailViewModel.swift",  "Managers"),
+    ("Views/GraphDetailView.swift",          "GraphDetailView.swift",       "Views"),
+
     # ── AutoPresets — Managers ──
     ("Managers/AutoPresets/AutoPresets_ActivityDetectionManager.swift", "AutoPresets_ActivityDetectionManager.swift", "Managers/AutoPresets"),
     ("Managers/AutoPresets/AutoPresets_Coordinator.swift",             "AutoPresets_Coordinator.swift",             "Managers/AutoPresets"),
