@@ -109,6 +109,7 @@ NEW_FILES=(
     "Loop/Services/LoopInsights/LoopInsights_CaffeineTracker.swift"
     "Loop/Services/LoopInsights/LoopInsights_VoiceService.swift"
     "Loop/Services/LoopInsights/LoopInsights_BackfillDetector.swift"
+    "Loop/Services/LoopInsights/LoopInsights_BehaviorInsightsAnalyzer.swift"
     "Loop/Services/LoopInsights/LoopInsights_DataAggregator.swift"
     "Loop/Services/LoopInsights/LoopInsights_FoodResponseAnalyzer.swift"
     "Loop/Services/LoopInsights/LoopInsights_GoalStore.swift"
@@ -152,6 +153,7 @@ NEW_FILES=(
     # LoopInsights — Views
     "Loop/Views/LoopInsights/LoopInsights_AGPChartView.swift"
     "Loop/Views/LoopInsights/LoopInsights_AlcoholLogView.swift"
+    "Loop/Views/LoopInsights/LoopInsights_BehaviorInsightsView.swift"
     "Loop/Views/LoopInsights/LoopInsights_ChatHistoryView.swift"
     "Loop/Views/LoopInsights/LoopInsights_CaffeineLogView.swift"
     "Loop/Views/LoopInsights/LoopInsights_ChatView.swift"
