@@ -839,10 +839,76 @@ update_pbxproj() {
     fi
 }
 
-# ─── Phase 8: Validate & Cleanup ─────────────────────────────────────────────
+# ─── Phase 8: Replace App Icon (PowerPack branding) ─────────────────────────
+
+replace_app_icon() {
+    header "Phase 8: Installing Loop AI PowerPack icon"
+
+    # Find the source icon — alongside this script, or download it
+    local src_icon=""
+    local script_dir
+
+    if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ "${BASH_SOURCE[0]}" != "bash" ]]; then
+        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+        if [[ -f "${script_dir}/AppIcon-PowerPack.png" ]]; then
+            src_icon="${script_dir}/AppIcon-PowerPack.png"
+        fi
+    fi
+
+    if [[ -z "$src_icon" ]] && [[ -f "Scripts/AppIcon-PowerPack.png" ]]; then
+        src_icon="Scripts/AppIcon-PowerPack.png"
+    fi
+
+    if [[ -z "$src_icon" ]]; then
+        info "Downloading AppIcon-PowerPack.png..."
+        mkdir -p Scripts
+        if curl -fsSL "${FEATURE_WORKSPACE_REPO}/Scripts/AppIcon-PowerPack.png" -o Scripts/AppIcon-PowerPack.png; then
+            src_icon="Scripts/AppIcon-PowerPack.png"
+            success "Downloaded PowerPack icon"
+        else
+            warn "Could not download PowerPack icon — skipping icon replacement"
+            return 0
+        fi
+    fi
+
+    local replaced=0
+
+    # Replace icons in all asset catalogs that have AppIcon.appiconset
+    for iconset_dir in \
+        "Loop/Loop/DerivedAssets.xcassets/AppIcon.appiconset" \
+        "Loop/Loop/DerivedAssetsBase.xcassets/AppIcon.appiconset" \
+        "Loop/WatchApp/DerivedAssets.xcassets/AppIcon.appiconset" \
+        "Loop/WatchApp/DerivedAssetsBase.xcassets/AppIcon.appiconset"; do
+
+        if [[ ! -d "$iconset_dir" ]]; then
+            continue
+        fi
+
+        # Replace every PNG in this icon set with a resized version of the PowerPack icon
+        for png in "$iconset_dir"/*.png; do
+            [[ -f "$png" ]] || continue
+            # Read the current dimensions and resize the source to match
+            local w h
+            w=$(sips -g pixelWidth "$png" 2>/dev/null | tail -1 | awk '{print $2}')
+            h=$(sips -g pixelHeight "$png" 2>/dev/null | tail -1 | awk '{print $2}')
+            if [[ -n "$w" ]] && [[ -n "$h" ]] && [[ "$w" -gt 0 ]]; then
+                sips -z "$h" "$w" "$src_icon" --out "$png" > /dev/null 2>&1
+                ((replaced++))
+            fi
+        done
+    done
+
+    if [[ $replaced -gt 0 ]]; then
+        success "Replaced $replaced icon files across all asset catalogs"
+    else
+        warn "No icon files found to replace"
+    fi
+}
+
+# ─── Phase 9: Validate & Cleanup ─────────────────────────────────────────────
 
 validate_installation() {
-    header "Phase 8: Validating installation"
+    header "Phase 9: Validating installation"
 
     local missing=0
 
@@ -1026,6 +1092,7 @@ main() {
     patch_settings_view
     patch_loop_data_manager
     update_pbxproj
+    replace_app_icon
     validate_installation
     cleanup
 }
