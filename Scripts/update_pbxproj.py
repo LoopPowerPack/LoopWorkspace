@@ -611,6 +611,19 @@ def main():
             content = add_child_to_group(content, parent_uuid, child_uuid, gname)
 
     # =========================================================================
+    # 4b. Add files directly to existing parent groups
+    # =========================================================================
+    # Files whose gkey matches an existing top-level group (e.g. "Managers", "Views")
+    # need to be added as children of that group directly — they aren't in a subgroup.
+    subgroup_keys = {gkey for gkey, _, _, _ in SUBGROUPS}
+    for path, name, gkey in SOURCE_FILES:
+        if gkey not in subgroup_keys and gkey in known_groups:
+            fr = fileref_uuid(name)
+            parent_uuid = known_groups[gkey]
+            content = add_child_to_group(content, parent_uuid, fr, name)
+            print(f"    Added {name} to existing group '{gkey}'")
+
+    # =========================================================================
     # 5. Add files to PBXSourcesBuildPhase
     # =========================================================================
     print("  Adding files to build phases...")
