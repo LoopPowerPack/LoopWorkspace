@@ -242,7 +242,6 @@ SUBGROUPS = [
 
     # SiteAtlas subgroups
     ("Models/SiteAtlas",        "SiteAtlas",     "SiteAtlas",     "Models"),
-    ("Resources/SiteAtlas",     "SiteAtlas",     "SiteAtlas",     "Resources"),
     ("Services/SiteAtlas",      "SiteAtlas",     "SiteAtlas",     "Services"),
     ("Views/SiteAtlas",         "SiteAtlas",     "SiteAtlas",     "Views"),
 

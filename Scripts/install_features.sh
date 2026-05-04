@@ -214,10 +214,6 @@ NEW_FILES=(
     # SiteAtlas — Models
     "Loop/Models/SiteAtlas/SiteAtlas_Models.swift"
 
-    # SiteAtlas — Resources
-    "Loop/Resources/SiteAtlas/BodyMapBack.png"
-    "Loop/Resources/SiteAtlas/BodyMapFront.png"
-
     # SiteAtlas — Services
     "Loop/Services/SiteAtlas/SiteAtlas_Coordinator.swift"
     "Loop/Services/SiteAtlas/SiteAtlas_FeatureFlags.swift"
@@ -490,6 +486,71 @@ install_new_files() {
     if [[ $failed -gt 0 ]]; then
         warn "$failed files failed to install"
     fi
+}
+
+# ─── Phase 4b: Install SiteAtlas Body Map Assets ─────────────────────────────
+
+install_body_map_assets() {
+    header "Phase 4b: Installing SiteAtlas body map assets"
+
+    pushd Loop > /dev/null
+
+    local assets_base="Loop/DerivedAssetsBase.xcassets"
+
+    # Pull the PNGs from the feature branch into a temp location
+    local tmp_front tmp_back
+    tmp_front=$(mktemp)
+    tmp_back=$(mktemp)
+
+    if git show "${FEATURE_REMOTE}/${FEATURE_LOOP_BRANCH}:Loop/Resources/SiteAtlas/BodyMapFront.png" > "$tmp_front" 2>/dev/null && \
+       git show "${FEATURE_REMOTE}/${FEATURE_LOOP_BRANCH}:Loop/Resources/SiteAtlas/BodyMapBack.png" > "$tmp_back" 2>/dev/null; then
+
+        # Create imageset directories
+        mkdir -p "$assets_base/BodyMapFront.imageset"
+        mkdir -p "$assets_base/BodyMapBack.imageset"
+
+        # Copy PNGs
+        cp "$tmp_front" "$assets_base/BodyMapFront.imageset/BodyMapFront.png"
+        cp "$tmp_back"  "$assets_base/BodyMapBack.imageset/BodyMapBack.png"
+
+        # Write Contents.json for each
+        cat > "$assets_base/BodyMapFront.imageset/Contents.json" << 'IMGEOF'
+{
+  "images" : [
+    {
+      "filename" : "BodyMapFront.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+IMGEOF
+
+        cat > "$assets_base/BodyMapBack.imageset/Contents.json" << 'IMGEOF'
+{
+  "images" : [
+    {
+      "filename" : "BodyMapBack.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+IMGEOF
+
+        success "Installed BodyMapFront + BodyMapBack imagesets into DerivedAssetsBase.xcassets"
+    else
+        warn "Could not retrieve body map PNGs from feature branch — SiteAtlas will use fallback icon"
+    fi
+
+    rm -f "$tmp_front" "$tmp_back"
+    popd > /dev/null
 }
 
 # ─── Phase 5: Patch Modified Files ───────────────────────────────────────────
@@ -1128,6 +1189,7 @@ main() {
     update_omnible
     bump_version
     install_new_files
+    install_body_map_assets
     patch_modified_files
     patch_settings_view
     patch_loop_data_manager
