@@ -1042,6 +1042,8 @@ LOOPKIT_EOF
     fi
 
     # 2. Patch Loop's SettingsView to register therapy help on appear
+    #    Anchors on .navigationViewStyle(.stack) which is at the end of the body
+    #    The .onAppear fires when SettingsView appears — BEFORE user navigates to TherapySettingsView
     local settings_file="Loop/Loop/Views/SettingsView.swift"
     if [[ -f "$settings_file" ]] && ! grep -q "TherapyHelpRegistry" "$settings_file"; then
         python3 - "$settings_file" << 'PYEOF'
@@ -1051,8 +1053,7 @@ filepath = sys.argv[1]
 with open(filepath, 'r') as f:
     content = f.read()
 
-# Add .onAppear { TherapyHelpRegistry.destination = ... } after .environment(\.insulinTintColor, ...)
-old_line = '.environment(\\.insulinTintColor, self.insulinTintColor)'
+old_line = '.navigationViewStyle(.stack)'
 new_block = old_line + '''
         .onAppear {
             TherapyHelpRegistry.destination = AnyView(LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores))
@@ -1062,9 +1063,9 @@ if old_line in content:
     content = content.replace(old_line, new_block, 1)
     with open(filepath, 'w') as f:
         f.write(content)
-    print("OK: Injected TherapyHelpRegistry into SettingsView")
+    print("OK: Injected TherapyHelpRegistry into SettingsView onAppear")
 else:
-    print("FAIL: insulinTintColor line not found in SettingsView")
+    print("FAIL: .navigationViewStyle(.stack) not found in SettingsView")
     sys.exit(1)
 PYEOF
         if [[ $? -eq 0 ]]; then
@@ -1085,7 +1086,6 @@ filepath = sys.argv[1]
 with open(filepath, 'r') as f:
     content = f.read()
 
-# Replace the supportSection to check TherapyHelpRegistry.destination
 old_support = '''    private var supportSection: some View {
         Section {
             NavigationLink(destination: DemoPlaceHolderView(appName: appName)) {
