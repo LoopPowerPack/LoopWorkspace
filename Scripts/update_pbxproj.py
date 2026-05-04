@@ -182,6 +182,19 @@ SOURCE_FILES = [
     # ── DataLayer — Views ──
     ("Views/DataLayer/DataLayer_ConsentView.swift",                "DataLayer_ConsentView.swift",             "Views/DataLayer"),
     ("Views/DataLayer/DataLayer_DashboardView.swift",              "DataLayer_DashboardView.swift",           "Views/DataLayer"),
+
+    # ── SiteAtlas — Models ──
+    ("Models/SiteAtlas/SiteAtlas_Models.swift",                    "SiteAtlas_Models.swift",                  "Models/SiteAtlas"),
+
+    # ── SiteAtlas — Services ──
+    ("Services/SiteAtlas/SiteAtlas_Coordinator.swift",             "SiteAtlas_Coordinator.swift",             "Services/SiteAtlas"),
+    ("Services/SiteAtlas/SiteAtlas_FeatureFlags.swift",            "SiteAtlas_FeatureFlags.swift",            "Services/SiteAtlas"),
+    ("Services/SiteAtlas/SiteAtlas_Storage.swift",                 "SiteAtlas_Storage.swift",                 "Services/SiteAtlas"),
+
+    # ── SiteAtlas — Views ──
+    ("Views/SiteAtlas/SiteAtlas_BodyMapView.swift",                "SiteAtlas_BodyMapView.swift",             "Views/SiteAtlas"),
+    ("Views/SiteAtlas/SiteAtlas_SettingsView.swift",               "SiteAtlas_SettingsView.swift",            "Views/SiteAtlas"),
+    ("Views/SiteAtlas/SiteAtlas_SiteSelectionSheet.swift",         "SiteAtlas_SiteSelectionSheet.swift",      "Views/SiteAtlas"),
 ]
 
 TEST_FILES = [
@@ -226,6 +239,12 @@ SUBGROUPS = [
     ("Resources/DataLayer",     "DataLayer",     "DataLayer",     "Resources"),
     ("Services/DataLayer",      "DataLayer",     "DataLayer",     "Services"),
     ("Views/DataLayer",         "DataLayer",     "DataLayer",     "Views"),
+
+    # SiteAtlas subgroups
+    ("Models/SiteAtlas",        "SiteAtlas",     "SiteAtlas",     "Models"),
+    ("Resources/SiteAtlas",     "SiteAtlas",     "SiteAtlas",     "Resources"),
+    ("Services/SiteAtlas",      "SiteAtlas",     "SiteAtlas",     "Services"),
+    ("Views/SiteAtlas",         "SiteAtlas",     "SiteAtlas",     "Views"),
 
     # Test subgroups
     ("LoopTests/FoodFinder",    "FoodFinder",    "FoodFinder",    "LoopTests"),

@@ -207,6 +207,27 @@ NEW_FILES=(
     "Loop/Views/DataLayer/DataLayer_ConsentView.swift"
     "Loop/Views/DataLayer/DataLayer_DashboardView.swift"
 
+    # SiteAtlas — Documentation
+    "Documentation/SiteAtlas/Developer.md"
+    "Documentation/SiteAtlas/User.md"
+
+    # SiteAtlas — Models
+    "Loop/Models/SiteAtlas/SiteAtlas_Models.swift"
+
+    # SiteAtlas — Resources
+    "Loop/Resources/SiteAtlas/BodyMapBack.png"
+    "Loop/Resources/SiteAtlas/BodyMapFront.png"
+
+    # SiteAtlas — Services
+    "Loop/Services/SiteAtlas/SiteAtlas_Coordinator.swift"
+    "Loop/Services/SiteAtlas/SiteAtlas_FeatureFlags.swift"
+    "Loop/Services/SiteAtlas/SiteAtlas_Storage.swift"
+
+    # SiteAtlas — Views
+    "Loop/Views/SiteAtlas/SiteAtlas_BodyMapView.swift"
+    "Loop/Views/SiteAtlas/SiteAtlas_SettingsView.swift"
+    "Loop/Views/SiteAtlas/SiteAtlas_SiteSelectionSheet.swift"
+
     # FoodFinder — Tests
     "LoopTests/FoodFinder/FoodFinder_BarcodeScannerTests.swift"
     "LoopTests/FoodFinder/FoodFinder_OpenFoodFactsTests.swift"
@@ -561,6 +582,8 @@ FEATURE_ROWS = """
             foodFinderSettingsRow
 
             loopInsightsSection
+
+            siteAtlasSettingsRow
 """
 
 anchor1 = 'Diabetes Treatment'
@@ -610,6 +633,18 @@ COMPUTED_PROPS = """
                             label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
                             descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
             }
+        }
+    }
+
+    private var siteAtlasSettingsRow: some View {
+        NavigationLink(destination: SiteAtlas_SettingsView()) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "mappin.and.ellipse")
+                            .foregroundColor(Color(red: 230/255, green: 126/255, blue: 34/255))
+                            .font(.system(size: 36)),
+                        label: NSLocalizedString("Site Atlas", comment: "Title text for button to Site Atlas Settings"),
+                        descriptiveText: NSLocalizedString("Track pump and sensor site rotation", comment: "Descriptive text for Site Atlas"))
         }
     }
 
@@ -686,6 +721,9 @@ DELEGATE_SETUP = """\
 
         // Set up AutoPresets coordinator delegate
         AutoPresets_Coordinator.shared.delegate = self
+
+        // Initialize SiteAtlas coordinator
+        _ = SiteAtlas_Coordinator.shared
 """
 
 anchor1 = "self.trustedTimeOffset = trustedTimeOffset"
