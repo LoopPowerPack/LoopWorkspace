@@ -274,12 +274,9 @@ PATCH_FILES=(
 )
 
 # Files that should be wholesale-replaced from feat/AllFeatures rather than
-# patched via 3-way merge. Used when the patch is small + isolated to our
-# features and L&L customizations don't touch the file. More robust than
-# 3-way merge in environments where line endings, whitespace, or context
-# drift cause `git apply --3way` to fail.
+# patched via 3-way merge. Use sparingly — only for files where L&L
+# customizations cannot conflict.
 OVERRIDE_FILES=(
-    "Loop/View Models/BolusEntryViewModel.swift"
 )
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -819,6 +816,111 @@ PYTHON_SCRIPT
         error "Failed to patch SettingsView.swift"
         return 1
     fi
+}
+
+# ─── Phase 6c: Patch BolusEntryViewModel.swift (Anchor-Based) ────────────────
+#
+# L&L Customizations modify the BolusEntryViewModelDelegate protocol signature
+# in this file (Result<DoseEntry, any Error> instead of Error?). Wholesale
+# replacement clobbers that change; 3-way merge can fail on context drift.
+# Anchor-based insertion adds BolusPro additions surgically while leaving the
+# protocol declaration and any L&L modifications intact.
+
+patch_bolus_entry_viewmodel() {
+    header "Phase 6c: Patching BolusEntryViewModel.swift (anchor-based, BolusPro)"
+
+    local target_file="Loop/Loop/View Models/BolusEntryViewModel.swift"
+
+    if [[ ! -f "$target_file" ]]; then
+        warn "BolusEntryViewModel.swift not found — skipping BolusPro patch"
+        return
+    fi
+
+    python3 - "$target_file" << 'PYTHON_SCRIPT'
+import sys
+
+path = sys.argv[1]
+with open(path, "r") as f:
+    content = f.read()
+
+if "bolusProSecondaryEntry" in content and "bolusProAnalyticsSnapshot" in content:
+    print("  Already patched — skipping.")
+    sys.exit(0)
+
+lines = content.split("\n")
+
+# ─── Anchor 1: Add the two BolusPro properties after selectedCarbAbsorptionTimeEmoji ───
+PROPS_BLOCK = """
+    /// BolusPro — optional secondary FPU carb entry, set by
+    /// `CarbEntryViewModel.setBolusViewModel()` when the user has the
+    /// per-entry toggle on and macros that yield a non-trivial bonus.
+    /// Saved alongside the primary in `saveAndDeliver()`.
+    var bolusProSecondaryEntry: NewCarbEntry?
+
+    /// BolusPro — analytics snapshot fired to DataLayer + LoopInsights
+    /// after the primary entry persists, regardless of whether the
+    /// per-entry toggle was on. Populated by CarbEntryViewModel.
+    var bolusProAnalyticsSnapshot: BolusProAnalyticsSnapshot?
+"""
+
+anchor1 = "let selectedCarbAbsorptionTimeEmoji: String?"
+anchor1_idx = None
+for i, line in enumerate(lines):
+    if anchor1 in line:
+        anchor1_idx = i
+        break
+
+if anchor1_idx is None:
+    print(f"ERROR: Anchor 1 not found: {anchor1}", file=sys.stderr)
+    sys.exit(1)
+
+prop_lines = PROPS_BLOCK.rstrip("\n").split("\n")
+for j, pl in enumerate(prop_lines):
+    lines.insert(anchor1_idx + 1 + j, pl)
+print(f"  Inserted {len(prop_lines)} property lines after selectedCarbAbsorptionTimeEmoji (line {anchor1_idx + 1})")
+
+# ─── Anchor 2: Add BolusPro save logic after the primary saveCarbEntry call ───
+SAVE_BLOCK = """
+                // BolusPro — save the optional secondary FPU entry alongside
+                // the primary. Failure here doesn't roll back the primary
+                // (the user already committed to that bolus); we just log.
+                if let secondary = bolusProSecondaryEntry {
+                    if let storedSecondary = await saveCarbEntry(secondary, replacingEntry: nil) {
+                        self.analyticsServicesManager?.didAddCarbs(source: "BolusPro", amount: storedSecondary.quantity.doubleValue(for: .gram()))
+                    } else {
+                        log.error("BolusPro secondary entry save failed — primary already saved.")
+                    }
+                }
+
+                // BolusPro — fire analytics + BehaviorInsights notification
+                // even when per-entry toggle was off, so we capture
+                // adoption vs. non-adoption population data.
+                if let snapshot = bolusProAnalyticsSnapshot {
+                    BolusPro_DataLayerHook.recordSavedEntry(snapshot)
+                }
+"""
+
+anchor2 = 'self.analyticsServicesManager?.didAddCarbs(source: "Phone"'
+anchor2_idx = None
+for i, line in enumerate(lines):
+    if anchor2 in line:
+        anchor2_idx = i
+        break
+
+if anchor2_idx is None:
+    print(f"ERROR: Anchor 2 not found: {anchor2}", file=sys.stderr)
+    sys.exit(1)
+
+save_lines = SAVE_BLOCK.rstrip("\n").split("\n")
+for j, sl in enumerate(save_lines):
+    lines.insert(anchor2_idx + 1 + j, sl)
+print(f"  Inserted {len(save_lines)} save-logic lines after didAddCarbs Phone call (line {anchor2_idx + 1})")
+
+with open(path, "w") as f:
+    f.write("\n".join(lines))
+
+print("  BolusEntryViewModel.swift patched successfully.")
+PYTHON_SCRIPT
 }
 
 # ─── Phase 6b: Patch LoopDataManager.swift (Anchor-Based) ────────────────────
@@ -1415,6 +1517,7 @@ main() {
     override_modified_files
     patch_modified_files
     patch_settings_view
+    patch_bolus_entry_viewmodel
     patch_loop_data_manager
     update_pbxproj
     replace_app_icon
