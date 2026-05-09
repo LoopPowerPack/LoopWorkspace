@@ -2,7 +2,7 @@
 # install_features.sh — Install FoodFinder + LoopInsights + AutoPresets into a standard Loop clone
 #
 # ONE-LINER INSTALL (run from your LoopWorkspace folder):
-#   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/TaylorJPatterson/LoopWorkspace/feat/installer/Scripts/install_features.sh)"
+#   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/LoopPowerPack/LoopWorkspace/feat/installer/Scripts/install_features.sh)"
 #
 # Or if you already have the scripts locally:
 #   ./Scripts/install_features.sh            # Install features
@@ -18,8 +18,8 @@ set -euo pipefail
 FEATURE_REMOTE="_feature_src"
 FEATURE_BRANCH="feat/installer"
 FEATURE_LOOP_BRANCH="feat/AllFeatures"
-FEATURE_REPO="https://github.com/TaylorJPatterson/Loop.git"
-FEATURE_WORKSPACE_REPO="https://raw.githubusercontent.com/TaylorJPatterson/LoopWorkspace/${FEATURE_BRANCH}"
+FEATURE_REPO="https://github.com/LoopPowerPack/Loop.git"
+FEATURE_WORKSPACE_REPO="https://raw.githubusercontent.com/LoopPowerPack/LoopWorkspace/${FEATURE_BRANCH}"
 MARKER_FILE=".feature_install_marker"
 
 # OmniBLE pod-keep-alive: fixes DASH connectivity on iPhone 16/17 with InPlay BLE (Atlas) pods

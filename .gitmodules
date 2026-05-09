@@ -1,6 +1,6 @@
 [submodule "Loop"]
 	path = Loop
-	url = https://github.com/TaylorJPatterson/Loop.git
+	url = https://github.com/LoopPowerPack/Loop.git
 	branch = feat/AllFeatures
 [submodule "LoopKit"]
 	path = LoopKit
