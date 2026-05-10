@@ -162,7 +162,7 @@ and posted to the project's GitHub Discussions.
 | Browser-build mirror (TestFlight pipeline) | https://github.com/TaylorJPatterson/Loop-AllFeatures *(intentionally not migrated; auto-syncs from LoopWorkspace and continues to work)* |
 | LoopKit fork (LoopKit-side feature integration) | https://github.com/taylorpatterson-T1D/LoopKit *(intentionally not migrated; submodule URL resolves correctly)* |
 | Install instructions (canonical user-facing README) | https://github.com/LoopPowerPack/LoopWorkspace/pull/1 |
-| Position paper on AI-assisted development | `Loop/Documentation/MANIFESTO.md` (also published on Substack) |
+| Position paper on AI-assisted development | [`MANIFESTO.md`](MANIFESTO.md) at this repo root (also published on Substack at [taylor256.substack.com](https://taylor256.substack.com)) |
 
 ## Filing bugs, requesting features, asking questions
 
