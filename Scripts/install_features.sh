@@ -13,10 +13,11 @@
 #   ./Scripts/install_features.sh --uninstall <id>    uninstall one feature non-interactively
 #
 # FEATURE IDS
-#   graph_detail_view, site_atlas, ai_suite
+#   site_atlas, ai_suite
 #
 #   `ai_suite` bundles AutoPresets + BolusPro + FoodFinder + LoopInsights
-#   + DataLayer (they share compile-time symbols and install together).
+#   + DataLayer + GraphDetailView (they share compile-time symbols and
+#   install together). Only SiteAtlas is genuinely standalone.
 #
 # ONE-LINER (anywhere — installer detects whether you're in a LoopWorkspace):
 #   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/LoopPowerPack/LoopWorkspace/feat/installer/Scripts/install_features.sh)"
@@ -1204,10 +1205,14 @@ uninstall_one() {
 # installer treats them as a single bundle.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Order matters: install features whose anchor inserts are LEAST likely to
-# be re-shuffled by later inserts first, so the SettingsView row order ends
-# up sensible (the anchor "Diabetes Treatment" is shared by all 5).
-AI_SUITE_FEATURE_IDS=(loop_insights food_finder bolus_pro autopresets)
+# Order matters:
+#   - loop_insights first so its types are on disk before any cross-referencing
+#     feature's wholesale-checkout files land (e.g. GraphDetailView's
+#     StatusTableViewController.swift references LoopInsights_BackfillDetector
+#     directly).
+#   - graph_detail_view last for the same reason — it pulls in a
+#     StatusTableViewController that references LoopInsights+DataLayer types.
+AI_SUITE_FEATURE_IDS=(loop_insights food_finder bolus_pro autopresets graph_detail_view)
 # loop_insights install also brings DataLayer files; there is no separate
 # "datalayer" feature to install.
 
@@ -1267,12 +1272,7 @@ show_powerpack_menu() {
     echo -e "  ${BOLD}Pick a feature to install:${NC}"
     echo
 
-    local gdv_state sa_state suite_state
-    if is_installed graph_detail_view; then
-        gdv_state="${GREEN}✓ installed${NC}"
-    else
-        gdv_state="${DIM}— Long-press chart for detailed timestamp data${NC}"
-    fi
+    local sa_state suite_state
     if is_installed site_atlas; then
         sa_state="${GREEN}✓ installed${NC}"
     else
@@ -1283,15 +1283,14 @@ show_powerpack_menu() {
     elif ai_suite_any_installed; then
         suite_state="${YELLOW}⚠ partially installed${NC}"
     else
-        suite_state="${DIM}— AutoPresets + BolusPro + FoodFinder + LoopInsights + DataLayer${NC}"
+        suite_state="${DIM}— AutoPresets + BolusPro + FoodFinder + LoopInsights + DataLayer + GraphDetailView${NC}"
     fi
 
-    printf "    1. %-22s %b\n" "GraphDetailView"     "$gdv_state"
-    printf "    2. %-22s %b\n" "SiteAtlas"           "$sa_state"
-    printf "    3. %-22s %b\n" "AI PowerPack Suite"  "$suite_state"
-    echo "                                (These 5 features share code and install together)"
+    printf "    1. %-22s %b\n" "SiteAtlas"           "$sa_state"
+    printf "    2. %-22s %b\n" "AI PowerPack Suite"  "$suite_state"
+    echo "                                (These features share code and install together)"
     echo
-    echo -e "    ${BOLD}A${NC}. Install ALL"
+    echo -e "    ${BOLD}A${NC}. Install ALL (SiteAtlas + AI Suite)"
     echo -e "    ${BOLD}U${NC}. Uninstall a feature"
     echo -e "    ${BOLD}R${NC}. Uninstall ALL (rollback)"
     echo -e "    ${BOLD}Q${NC}. Quit"
@@ -1305,19 +1304,15 @@ show_uninstall_menu() {
     echo -e "${BOLD}╚══════════════════════════════════════════════════════════╝${NC}"
     echo
 
-    # Build a flat list of uninstallable items: GraphDetailView, SiteAtlas, AI Suite.
+    # Build a flat list of uninstallable items: SiteAtlas, AI Suite.
     local -a labels=()
     local -a actions=()
-    if is_installed graph_detail_view; then
-        labels+=("GraphDetailView")
-        actions+=("uninstall_graph_detail_view")
-    fi
     if is_installed site_atlas; then
         labels+=("SiteAtlas")
         actions+=("uninstall_site_atlas")
     fi
     if ai_suite_any_installed; then
-        labels+=("AI PowerPack Suite (all 5)")
+        labels+=("AI PowerPack Suite (all 5 + GraphDetailView)")
         actions+=("uninstall_ai_suite")
     fi
 
@@ -1352,13 +1347,11 @@ show_uninstall_menu() {
 powerpack_interactive_loop() {
     while true; do
         show_powerpack_menu
-        read -r -p "  Choose [1-3 / A / U / R / Q]: " choice
+        read -r -p "  Choose [1-2 / A / U / R / Q]: " choice
         case "$choice" in
-            1) install_graph_detail_view; read -r -p "  Press Enter..." ;;
-            2) install_site_atlas;        read -r -p "  Press Enter..." ;;
-            3) install_ai_suite;          read -r -p "  Press Enter..." ;;
+            1) install_site_atlas;        read -r -p "  Press Enter..." ;;
+            2) install_ai_suite;          read -r -p "  Press Enter..." ;;
             A|a)
-                install_graph_detail_view
                 install_site_atlas
                 install_ai_suite
                 read -r -p "  All-features install complete. Press Enter..."
@@ -1370,7 +1363,6 @@ powerpack_interactive_loop() {
                 echo
                 read -r -p "  Uninstall ALL installed features? [y/N]: " confirm
                 if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
-                    is_installed graph_detail_view && uninstall_graph_detail_view
                     is_installed site_atlas        && uninstall_site_atlas
                     ai_suite_any_installed         && uninstall_ai_suite
                     rm -f "Loop/${LEGACY_MARKER}"
@@ -1510,7 +1502,6 @@ bootstrap_dispatch() {
 # ─────────────────────────────────────────────────────────────────────────────
 
 cli_install_all() {
-    install_graph_detail_view
     install_site_atlas
     install_ai_suite
     cleanup_remote
@@ -1519,11 +1510,10 @@ cli_install_all() {
 
 cli_install_feature() {
     case "$1" in
-        graph_detail_view)  install_graph_detail_view ;;
         site_atlas)         install_site_atlas ;;
         ai_suite|all|suite) install_ai_suite ;;
-        autopresets|bolus_pro|food_finder|loop_insights)
-            warn "'$1' belongs to the AI PowerPack Suite bundle (entangled with the 4 other AI features)."
+        autopresets|bolus_pro|food_finder|loop_insights|graph_detail_view)
+            warn "'$1' belongs to the AI PowerPack Suite bundle (entangled with other features)."
             warn "Installing the full bundle. Use --feature ai_suite for the same effect."
             install_ai_suite
             ;;
@@ -1534,7 +1524,6 @@ cli_install_feature() {
 }
 
 cli_uninstall_all() {
-    is_installed graph_detail_view && uninstall_graph_detail_view
     is_installed site_atlas        && uninstall_site_atlas
     ai_suite_any_installed         && uninstall_ai_suite
     rm -f "Loop/${LEGACY_MARKER}"
@@ -1544,10 +1533,9 @@ cli_uninstall_all() {
 
 cli_uninstall_feature() {
     case "$1" in
-        graph_detail_view)  uninstall_graph_detail_view ;;
         site_atlas)         uninstall_site_atlas ;;
         ai_suite|all|suite) uninstall_ai_suite ;;
-        autopresets|bolus_pro|food_finder|loop_insights)
+        autopresets|bolus_pro|food_finder|loop_insights|graph_detail_view)
             warn "'$1' belongs to the AI PowerPack Suite bundle. Uninstalling the whole bundle."
             uninstall_ai_suite
             ;;

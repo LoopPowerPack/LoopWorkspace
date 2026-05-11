@@ -405,6 +405,16 @@ def find_test_sources_phase(content: str) -> Optional[str]:
 # pbxproj mutation: ADD
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _section_text(content: str, section_name: str) -> str:
+    """Return the body of `/* Begin <section_name> section */ ... /* End <section_name> section */`,
+    or "" if the section isn't present."""
+    m = re.search(
+        rf'/\* Begin {section_name} section \*/(.*?)/\* End {section_name} section \*/',
+        content, re.DOTALL,
+    )
+    return m.group(1) if m else ""
+
+
 def add_child_to_group(content: str, parent_uuid: str, child_uuid: str, child_name: str) -> str:
     new_child = f"\t\t\t\t{child_uuid} /* {child_name} */,"
     pattern = (
@@ -419,6 +429,8 @@ def add_child_to_group(content: str, parent_uuid: str, child_uuid: str, child_na
         if child_uuid in match.group(2):
             return content  # already present
         content = content[:match.start()] + f"{match.group(1)}{match.group(2)}\n{new_child}{match.group(3)}" + content[match.end():]
+    else:
+        print(f"  WARNING: could not find PBXGroup {parent_uuid} to add child {child_name}", file=sys.stderr)
     return content
 
 
@@ -434,6 +446,8 @@ def add_to_build_phase(content: str, phase_uuid: str, entries_block: str) -> str
     match = re.search(pattern, content, re.DOTALL)
     if match:
         content = content[:match.start()] + f"{match.group(1)}{match.group(2)}\n{entries_block}{match.group(3)}" + content[match.end():]
+    else:
+        print(f"  WARNING: could not find PBXSourcesBuildPhase {phase_uuid} to add entries", file=sys.stderr)
     return content
 
 
@@ -457,28 +471,47 @@ def add_features(content: str, feature_ids: set[str]) -> str:
     main_sources = find_main_sources_phase(content)
     test_sources = find_test_sources_phase(content)
 
+    if main_sources is None:
+        print("  WARNING: could not locate PBXSourcesBuildPhase for Loop target — source files won't be added to the build", file=sys.stderr)
+    if test_sources is None and any(t[3] in feature_ids for t in TEST_FILES):
+        print("  WARNING: could not locate PBXSourcesBuildPhase for LoopTests target — test files won't be added", file=sys.stderr)
+
     # Filter manifests to selected features.
     src = [t for t in SOURCE_FILES if t[3] in feature_ids]
     tst = [t for t in TEST_FILES if t[3] in feature_ids]
     # SUBGROUPS we need: shared parents (None-owned) plus this feature's subgroups.
     sub = [t for t in SUBGROUPS if t[4] is None or t[4] in feature_ids]
 
+    # Cache existing section bodies so duplicate-detection is scoped correctly.
+    # Critical: a FileRef UUID also appears INSIDE its BuildFile entry's
+    # `fileRef = <fr>` field, so a naive `if fr not in content` check would
+    # produce false positives after step 1 inserts BuildFile entries and skip
+    # the corresponding PBXFileReference entry — leaving Xcode unable to
+    # resolve the type. Scope each duplicate check to the right section.
+    buildfile_block = _section_text(content, "PBXBuildFile")
+    fileref_block   = _section_text(content, "PBXFileReference")
+
     # ── 1. PBXBuildFile entries
     build_entries = []
+    skipped_bf = 0
     for path, name, _, _ in src + tst:
         bf = buildfile_uuid(name)
         fr = fileref_uuid(name)
         entry = f"\t\t{bf} /* {name} in Sources */ = {{isa = PBXBuildFile; fileRef = {fr} /* {name} */; }};"
-        if bf not in content:
-            build_entries.append(entry)
+        if bf in buildfile_block:
+            skipped_bf += 1
+            continue
+        build_entries.append(entry)
     if build_entries:
         content = content.replace(
             "/* End PBXBuildFile section */",
             "\n".join(build_entries) + "\n/* End PBXBuildFile section */",
         )
+    print(f"    PBXBuildFile entries: added={len(build_entries)} skipped={skipped_bf}")
 
     # ── 2. PBXFileReference entries
     ref_entries = []
+    skipped_fr = 0
     for path, name, _, _ in src + tst:
         fr = fileref_uuid(name)
         entry = (
@@ -486,13 +519,16 @@ def add_features(content: str, feature_ids: set[str]) -> str:
             f"{{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; "
             f"path = {name}; sourceTree = \"<group>\"; }};"
         )
-        if fr not in content:
-            ref_entries.append(entry)
+        if fr in fileref_block:
+            skipped_fr += 1
+            continue
+        ref_entries.append(entry)
     if ref_entries:
         content = content.replace(
             "/* End PBXFileReference section */",
             "\n".join(ref_entries) + "\n/* End PBXFileReference section */",
         )
+    print(f"    PBXFileReference entries: added={len(ref_entries)} skipped={skipped_fr}")
 
     # ── 3. Build child lists per subgroup
     group_children: dict[str, list[tuple[str, str]]] = {gkey: [] for gkey, _, _, _, _ in sub}
