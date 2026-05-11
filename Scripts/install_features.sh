@@ -1533,7 +1533,7 @@ rollback() {
     popd > /dev/null
 
     echo ""
-    echo -e "${GREEN}${BOLD}  Rollback complete. Your Loop is back to its previous state.${NC}"
+    echo -e "${GREEN}${BOLD}  Rollback complete. Your Loop is back to its previous state. You must rebuild now.${NC}"
     echo ""
 }
 
