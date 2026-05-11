@@ -36,7 +36,7 @@ Three reasons. None of them is "because it's cool."
 
 ---
 
-![Software Development Lifecycle Before and After Agentic Coding Tools](Documentation/assets/SDLCBeforeandAfter.jpg)
+<img src="Documentation/assets/SDLCBeforeandAfter.jpg" width="75%" alt="Software Development Lifecycle Before and After Agentic Coding Tools">
 
 *Diagram by [Greg Coquillo](https://www.linkedin.com/posts/greg-coquillo_software-development-is-quietly-undergoing-share-7458842822016880640-tGb6/), Product Leader, summarizing Anthropic's report on agentic software development. Top: traditional SDLC, weeks-to-months per cycle, with sequential human handoffs at every step. Bottom: agentic SDLC, hours-to-days per cycle, with the human guiding direction and reviewing outcomes while an AI agent expresses intent into specs, implements, tests, and ships.*
 
