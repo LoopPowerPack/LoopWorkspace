@@ -2,10 +2,10 @@ name: 4. Build Loop
 run-name: Build Loop (${{ github.ref_name }})
 on:
   workflow_dispatch:
-  schedule:
-    # Check for updates every Sunday
-    #   Later logic builds if there are updates or if it is the 2nd Sunday of the month
-    - cron: "33 7 * * 0" # Sunday at UTC 7:33
+  # `schedule:` trigger removed. GitHub's fork-protection auto-disables
+  # scheduled workflows on forks and labels them "disabled_manually",
+  # which caused Build Loop to be disabled after every successful manual
+  # run. Users still trigger builds via the Run Workflow button.
 
 env:
   GH_PAT: ${{ secrets.GH_PAT }}
