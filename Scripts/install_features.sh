@@ -1441,7 +1441,7 @@ cleanup() {
     echo -e "  ${BOLD}Next steps:${NC}"
     echo "  1. Open LoopWorkspace.xcworkspace in Xcode"
     echo "  2. Build and run (Cmd+R)"
-    echo "  3. In Loop > Settings > Enable AutoPresets / FoodFinder / LoopInsights"
+    echo "  3. In Loop > Settings > Enable PowerPack Features Individually"
     echo "  4. Enter your AI API key in FoodFinder Settings"
     echo ""
     echo -e "  ${BOLD}To uninstall:${NC}"
