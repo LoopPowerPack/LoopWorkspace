@@ -877,14 +877,29 @@ path = sys.argv[1]
 with open(path, "r") as f:
     content = f.read()
 
-if "bolusProSecondaryEntry" in content and "bolusProAnalyticsSnapshot" in content:
-    print("  Already patched — skipping.")
-    sys.exit(0)
-
 lines = content.split("\n")
 
-# ─── Anchor 1: Add the two BolusPro properties after selectedCarbAbsorptionTimeEmoji ───
-PROPS_BLOCK = """
+# Each anchor below is independently idempotent — the marker string lets us
+# skip just the addition that's already in place, so users upgrading from
+# an older PowerPack install still receive any newly-introduced additions.
+
+def find_line(needle):
+    for i, line in enumerate(lines):
+        if needle in line:
+            return i
+    return None
+
+def insert_after(idx, block):
+    body = block.rstrip("\n").split("\n")
+    for offset, line in enumerate(body):
+        lines.insert(idx + 1 + offset, line)
+    return len(body)
+
+inserted_any = False
+
+# ─── Anchor 1: BolusPro properties after selectedCarbAbsorptionTimeEmoji ───
+if "bolusProSecondaryEntry" not in content:
+    BOLUSPRO_PROPS = """
     /// BolusPro — optional secondary FPU carb entry, set by
     /// `CarbEntryViewModel.setBolusViewModel()` when the user has the
     /// per-entry toggle on and macros that yield a non-trivial bonus.
@@ -896,25 +911,57 @@ PROPS_BLOCK = """
     /// per-entry toggle was on. Populated by CarbEntryViewModel.
     var bolusProAnalyticsSnapshot: BolusProAnalyticsSnapshot?
 """
+    idx = find_line("let selectedCarbAbsorptionTimeEmoji: String?")
+    if idx is None:
+        print("ERROR: Anchor 'selectedCarbAbsorptionTimeEmoji' not found", file=sys.stderr)
+        sys.exit(1)
+    n = insert_after(idx, BOLUSPRO_PROPS)
+    print(f"  Inserted {n} BolusPro property lines (after line {idx + 1})")
+    inserted_any = True
 
-anchor1 = "let selectedCarbAbsorptionTimeEmoji: String?"
-anchor1_idx = None
-for i, line in enumerate(lines):
-    if anchor1 in line:
-        anchor1_idx = i
-        break
+# ─── Anchor 2: onCarbEntrySaved property after bolusProAnalyticsSnapshot ───
+# Added in efa338aa to gate MealArchive writes on actual carb persistence.
+if "onCarbEntrySaved" not in content:
+    ON_SAVED_PROP = """
+    /// Fires immediately after the *primary* carb entry has been persisted
+    /// to CarbStore (i.e., the user committed the carbs — not when they
+    /// merely tapped Continue and then cancelled the bolus screen).
+    /// `CarbEntryViewModel.setBolusViewModel()` uses this to archive the
+    /// FoodFinder analysis to MealArchive only on actual commit. Receives
+    /// the persisted entry so the caller can use its real syncIdentifier.
+    var onCarbEntrySaved: ((StoredCarbEntry) -> Void)?
+"""
+    idx = find_line("var bolusProAnalyticsSnapshot: BolusProAnalyticsSnapshot?")
+    if idx is None:
+        print("ERROR: Anchor 'bolusProAnalyticsSnapshot' not found", file=sys.stderr)
+        sys.exit(1)
+    n = insert_after(idx, ON_SAVED_PROP)
+    print(f"  Inserted {n} onCarbEntrySaved property lines (after line {idx + 1})")
+    inserted_any = True
 
-if anchor1_idx is None:
-    print(f"ERROR: Anchor 1 not found: {anchor1}", file=sys.stderr)
-    sys.exit(1)
+# ─── Anchor 3: onCarbEntrySaved call site after the "Phone" didAddCarbs line ───
+# Must be inserted BEFORE the BolusPro save block (Anchor 4) so the archive
+# fires for the primary, not the BolusPro secondary.
+if 'self.onCarbEntrySaved?(storedCarbEntry)' not in content:
+    ON_SAVED_CALL = """
+                // FoodFinder/MealInsights archive only fires on actual carb
+                // persistence — tapping Continue and then cancelling the
+                // bolus screen no longer leaves a phantom Meal Insights row.
+                self.onCarbEntrySaved?(storedCarbEntry)
+"""
+    idx = find_line('self.analyticsServicesManager?.didAddCarbs(source: "Phone"')
+    if idx is None:
+        print("ERROR: Anchor 'didAddCarbs Phone' not found", file=sys.stderr)
+        sys.exit(1)
+    n = insert_after(idx, ON_SAVED_CALL)
+    print(f"  Inserted {n} onCarbEntrySaved call lines (after line {idx + 1})")
+    inserted_any = True
 
-prop_lines = PROPS_BLOCK.rstrip("\n").split("\n")
-for j, pl in enumerate(prop_lines):
-    lines.insert(anchor1_idx + 1 + j, pl)
-print(f"  Inserted {len(prop_lines)} property lines after selectedCarbAbsorptionTimeEmoji (line {anchor1_idx + 1})")
-
-# ─── Anchor 2: Add BolusPro save logic after the primary saveCarbEntry call ───
-SAVE_BLOCK = """
+# ─── Anchor 4: BolusPro save logic after the primary didAddCarbs/onCarbEntrySaved ───
+# Anchor on the BolusPro-specific marker we just inserted (or the existing
+# Phone-didAddCarbs if no prior install of Anchor 3).
+if "BolusPro — save the optional secondary FPU entry" not in content:
+    BOLUSPRO_SAVE = """
                 // BolusPro — save the optional secondary FPU entry alongside
                 // the primary. Failure here doesn't roll back the primary
                 // (the user already committed to that bolus); we just log.
@@ -933,22 +980,21 @@ SAVE_BLOCK = """
                     BolusPro_DataLayerHook.recordSavedEntry(snapshot)
                 }
 """
+    # Prefer to insert right after the onCarbEntrySaved call line if present
+    # in this run; otherwise fall back to the Phone didAddCarbs anchor.
+    idx = find_line('self.onCarbEntrySaved?(storedCarbEntry)')
+    if idx is None:
+        idx = find_line('self.analyticsServicesManager?.didAddCarbs(source: "Phone"')
+    if idx is None:
+        print("ERROR: BolusPro save anchor not found", file=sys.stderr)
+        sys.exit(1)
+    n = insert_after(idx, BOLUSPRO_SAVE)
+    print(f"  Inserted {n} BolusPro save-logic lines (after line {idx + 1})")
+    inserted_any = True
 
-anchor2 = 'self.analyticsServicesManager?.didAddCarbs(source: "Phone"'
-anchor2_idx = None
-for i, line in enumerate(lines):
-    if anchor2 in line:
-        anchor2_idx = i
-        break
-
-if anchor2_idx is None:
-    print(f"ERROR: Anchor 2 not found: {anchor2}", file=sys.stderr)
-    sys.exit(1)
-
-save_lines = SAVE_BLOCK.rstrip("\n").split("\n")
-for j, sl in enumerate(save_lines):
-    lines.insert(anchor2_idx + 1 + j, sl)
-print(f"  Inserted {len(save_lines)} save-logic lines after didAddCarbs Phone call (line {anchor2_idx + 1})")
+if not inserted_any:
+    print("  Already fully patched — nothing to do.")
+    sys.exit(0)
 
 with open(path, "w") as f:
     f.write("\n".join(lines))
