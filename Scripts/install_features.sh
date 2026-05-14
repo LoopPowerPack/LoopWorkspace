@@ -37,11 +37,8 @@ FEATURE_REPO="https://github.com/LoopPowerPack/Loop.git"
 FEATURE_WORKSPACE_REPO="https://raw.githubusercontent.com/LoopPowerPack/LoopWorkspace/${FEATURE_BRANCH}"
 MARKER_FILE=".feature_install_marker"
 
-# OmniBLE pod-keep-alive: fixes DASH connectivity on iPhone 16/17 with InPlay BLE (Atlas) pods
-OMNIBLE_POD_KEEP_ALIVE_SHA="dade6ed309eb72232a187d88179a367e34f800d9"
-
 # Version to stamp after installation
-FEATURE_VERSION="3.13.1"
+FEATURE_VERSION="3.14.0"
 FEATURE_BUILD="58"
 
 # Colors
@@ -465,39 +462,16 @@ setup_source_remote() {
     popd > /dev/null
 }
 
-# ─── Phase 3b: Update OmniBLE to pod-keep-alive ─────────────────────────────
-
-update_omnible() {
-    header "Phase 3b: Updating OmniBLE to pod-keep-alive"
-
-    if [[ ! -d "OmniBLE/.git" ]] && [[ ! -f "OmniBLE/.git" ]]; then
-        warn "OmniBLE submodule not found — skipping pod-keep-alive update"
-        return
-    fi
-
-    pushd OmniBLE > /dev/null
-
-    # Fetch the pod-keep-alive branch from upstream
-    git fetch origin pod-keep-alive --depth=1 2>/dev/null || {
-        warn "Could not fetch pod-keep-alive branch from OmniBLE — skipping"
-        popd > /dev/null
-        return
-    }
-
-    git checkout "$OMNIBLE_POD_KEEP_ALIVE_SHA" 2>/dev/null || {
-        warn "Could not checkout OmniBLE pod-keep-alive SHA — skipping"
-        popd > /dev/null
-        return
-    }
-
-    popd > /dev/null
-    success "OmniBLE updated to pod-keep-alive (DASH connectivity fix)"
-}
-
-# ─── Phase 3c: Bump version ─────────────────────────────────────────────────
+# ─── Phase 3b: Bump version ─────────────────────────────────────────────────
+#
+# (The former Phase 3b that cherry-picked OmniBLE's pod-keep-alive branch
+# was removed when LoopKit/OmniBLE merged that fix into mainline as PR #165
+# in OmniBLE v.r.r — the workspace v3.14.0 bump already brings it in. The
+# upstream `feat/pod-keep-alive` branch was deleted per the L&L release
+# announcement on 14 May 2026.)
 
 bump_version() {
-    header "Phase 3c: Setting version to ${FEATURE_VERSION} (${FEATURE_BUILD})"
+    header "Phase 3b: Setting version to ${FEATURE_VERSION} (${FEATURE_BUILD})"
 
     if [[ -f "VersionOverride.xcconfig" ]]; then
         sed -i '' "s/LOOP_MARKETING_VERSION = .*/LOOP_MARKETING_VERSION = ${FEATURE_VERSION}/" VersionOverride.xcconfig
@@ -1589,7 +1563,6 @@ do_install() {
     validate_environment
     create_backup
     setup_source_remote
-    update_omnible
     bump_version
     install_new_files
     install_body_map_assets
