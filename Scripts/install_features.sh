@@ -107,6 +107,7 @@ NEW_FILES=(
     # LoopInsights — Resources
     "Loop/Resources/LoopInsights/LoopInsights_FeatureFlags.swift"
     "Loop/Resources/LoopInsights/PowerPack_BuildInfo.swift"
+    "Loop/Resources/LoopInsights/PowerPack_UpdateChecker.swift"
     "Loop/Resources/LoopInsights/TestData/tidepool_carb_entries.json"
     "Loop/Resources/LoopInsights/TestData/tidepool_dose_entries.json"
     "Loop/Resources/LoopInsights/TestData/tidepool_glucose_samples.json"
