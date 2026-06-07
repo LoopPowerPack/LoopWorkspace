@@ -49,7 +49,7 @@ FEATURE_BUILD="58"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.0"
+POWERPACK_VERSION="0.3.1"
 
 # Colors
 RED='\033[0;31m'
@@ -108,6 +108,7 @@ NEW_FILES=(
     "Loop/Resources/LoopInsights/LoopInsights_FeatureFlags.swift"
     "Loop/Resources/LoopInsights/PowerPack_BuildInfo.swift"
     "Loop/Resources/LoopInsights/PowerPack_UpdateChecker.swift"
+    "Loop/Resources/LoopInsights/PowerPack_APIUsage.swift"
     "Loop/Resources/LoopInsights/TestData/tidepool_carb_entries.json"
     "Loop/Resources/LoopInsights/TestData/tidepool_dose_entries.json"
     "Loop/Resources/LoopInsights/TestData/tidepool_glucose_samples.json"

@@ -173,6 +173,7 @@ SOURCE_FILES: list[tuple[str, str, str, str]] = [
     ("Resources/LoopInsights/LoopInsights_FeatureFlags.swift",     "LoopInsights_FeatureFlags.swift",      "Resources/LoopInsights","loop_insights"),
     ("Resources/LoopInsights/PowerPack_BuildInfo.swift",           "PowerPack_BuildInfo.swift",            "Resources/LoopInsights","loop_insights"),
     ("Resources/LoopInsights/PowerPack_UpdateChecker.swift",       "PowerPack_UpdateChecker.swift",        "Resources/LoopInsights","loop_insights"),
+    ("Resources/LoopInsights/PowerPack_APIUsage.swift",            "PowerPack_APIUsage.swift",             "Resources/LoopInsights","loop_insights"),
     ("Resources/DataLayer/DataLayer_FeatureFlags.swift",           "DataLayer_FeatureFlags.swift",         "Resources/DataLayer",   "loop_insights"),
     ("Services/LoopInsights/LoopInsights_AdvancedAnalyzers.swift", "LoopInsights_AdvancedAnalyzers.swift", "Services/LoopInsights", "loop_insights"),
     ("Services/LoopInsights/LoopInsights_AIAnalysis.swift",        "LoopInsights_AIAnalysis.swift",        "Services/LoopInsights", "loop_insights"),
