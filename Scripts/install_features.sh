@@ -49,7 +49,7 @@ FEATURE_BUILD="58"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.1"
+POWERPACK_VERSION="0.3.2"
 
 # Colors
 RED='\033[0;31m'
@@ -129,6 +129,7 @@ NEW_FILES=(
     "Loop/Services/FoodFinder/FoodFinder_ScannerService.swift"
     "Loop/Services/FoodFinder/FoodFinder_SearchRouter.swift"
     "Loop/Services/FoodFinder/FoodFinder_SecureStorage.swift"
+    "Loop/Services/FoodFinder/FoodFinder_SpoonacularService.swift"
     "Loop/Services/FoodFinder/FoodFinder_VoiceService.swift"
 
     # LoopInsights — Services
@@ -207,6 +208,7 @@ NEW_FILES=(
     "Loop/Views/FoodFinder/FoodFinder_FavoritesHelpers.swift"
     "Loop/Views/FoodFinder/FoodFinder_ScannerView.swift"
     "Loop/Views/FoodFinder/FoodFinder_SearchBar.swift"
+    "Loop/Views/FoodFinder/FoodFinder_RestaurantMenuView.swift"
     "Loop/Views/FoodFinder/FoodFinder_SearchResultsView.swift"
     "Loop/Views/FoodFinder/FoodFinder_SettingsView.swift"
     "Loop/Views/FoodFinder/FoodFinder_VoiceSearchView.swift"
