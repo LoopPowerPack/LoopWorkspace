@@ -49,7 +49,7 @@ FEATURE_BUILD="58"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.2"
+POWERPACK_VERSION="0.3.3"
 
 # Colors
 RED='\033[0;31m'

@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.2",
-  "notes": "FoodFinder restaurant menus: within 200 ft of a restaurant, tap your menu item to use its real nutrition and skip AI image analysis (saves tokens) — add a free Spoonacular key in FoodFinder Settings. Also tightens GPS tagging to 200 ft, fixes a token-confirmation popup that could interrupt photo/chat analysis, and improves the caregiver digest SMS layout with separate email/phone.",
+  "latest": "0.3.3",
+  "notes": "Caregiver Digest now actually runs on schedule. Before, setting it to Daily or Weekly did nothing — it never sent on its own. Now you get a reminder at a time you pick (Daily or Weekly), and opening the digest when one is due pops the pre-filled message ready to send in one tap. Also renamed the 'iMessage / SMS' option to just 'SMS'.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
