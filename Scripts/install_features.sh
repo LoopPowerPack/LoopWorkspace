@@ -779,6 +779,12 @@ KEYS = {
         "FoodFinder uses your location to tag meals with where you ate. AutoPresets uses location to activate presets when you arrive at or leave saved places like the gym.",
     "NSLocationAlwaysAndWhenInUseUsageDescription":
         "AutoPresets uses background location to monitor geofences and automatically activate presets when you arrive at or leave saved locations. This is battery-efficient and does not continuously track your position.",
+    "NSMotionUsageDescription":
+        "AutoPresets uses motion and fitness activity to detect when you start exercising so it can automatically suggest the right preset.",
+    "NSCalendarsUsageDescription":
+        "AutoPresets reads your calendar to activate presets around scheduled events like workouts or meals.",
+    "NSCalendarsFullAccessUsageDescription":
+        "AutoPresets reads your calendar to activate presets around scheduled events like workouts or meals.",
 }
 
 with open(PLIST, "rb") as f:
