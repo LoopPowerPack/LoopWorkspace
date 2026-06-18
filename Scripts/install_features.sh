@@ -49,7 +49,7 @@ FEATURE_BUILD="58"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.3"
+POWERPACK_VERSION="0.3.4"
 
 # Colors
 RED='\033[0;31m'
@@ -1523,6 +1523,79 @@ PYEOF
         fi
     else
         info "TherapySettingsView already patched or not found — skipping"
+    fi
+
+    # 4. Add the now-line indicator + attributed-subtitle support to the charts.
+    #    Uses the SAME variable names as the L&L now_line customization, and skips any
+    #    chart that already contains `currentTimeLayer`, so it can't double-apply or
+    #    conflict whether L&L's now_line was applied before or after PowerPack.
+    python3 - << 'PYEOF'
+import os
+
+# (a) ChartTableViewCell: attributed-subtitle setter used by the styled value labels
+cell_path = "LoopKit/LoopKitUI/Views/ChartTableViewCell.swift"
+if os.path.exists(cell_path):
+    with open(cell_path) as f:
+        c = f.read()
+    if "setSubtitleAttributedText" in c:
+        print("SKIP: ChartTableViewCell already has setSubtitleAttributedText")
+    else:
+        anchor = """    public func setSubtitleTextColor(color: UIColor) {
+        subtitleLabel?.textColor = color
+    }"""
+        addition = anchor + """
+
+    public func setSubtitleAttributedText(_ attributedText: NSAttributedString?) {
+        subtitleLabel?.attributedText = attributedText
+    }"""
+        if anchor in c:
+            with open(cell_path, "w") as f:
+                f.write(c.replace(anchor, addition, 1))
+            print("OK: ChartTableViewCell attributed-subtitle setter added")
+        else:
+            print("WARN: setSubtitleTextColor anchor not found in ChartTableViewCell")
+else:
+    print("WARN: ChartTableViewCell.swift not found")
+
+# (b) Now-line vertical guide on the four status charts (tinted per chart)
+grid = ('let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, '
+        'yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, '
+        'axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)')
+charts = {
+    "LoopKit/LoopKitUI/Charts/PredictedGlucoseChart.swift": "glucoseTint",
+    "LoopKit/LoopKitUI/Charts/IOBChart.swift": "insulinTint",
+    "LoopKit/LoopKitUI/Charts/DoseChart.swift": "insulinTint",
+    "LoopKit/LoopKitUI/Charts/COBChart.swift": "carbTint",
+}
+for path, tint in charts.items():
+    name = os.path.basename(path)
+    if not os.path.exists(path):
+        print("WARN: not found: " + path)
+        continue
+    with open(path) as f:
+        c = f.read()
+    if "currentTimeLayer" in c:
+        print("SKIP: now-line already present in " + name + " (L&L now_line or prior run)")
+        continue
+    if grid not in c:
+        print("WARN: gridLayer anchor not found in " + name)
+        continue
+    block = ('\n\n        // Now line — vertical guide at the current time (L&L now_line customization)\n'
+             '        let currentTimeValue = ChartAxisValueDate(date: Date(), formatter: { _ in "" })\n'
+             '        let currentTimeSettings = ChartGuideLinesLayerSettings(linesColor: colors.%s, linesWidth: 1.0)\n'
+             '        let currentTimeLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, '
+             'yAxis: yAxisLayer.axis, settings: currentTimeSettings, axisValuesX: [currentTimeValue], '
+             'axisValuesY: [])') % tint
+    c = c.replace(grid, grid + block, 1)
+    c = c.replace("            gridLayer,\n", "            gridLayer,\n            currentTimeLayer,\n", 1)
+    with open(path, "w") as f:
+        f.write(c)
+    print("OK: now-line added to " + name)
+PYEOF
+    if [[ $? -eq 0 ]]; then
+        success "Patched charts for now-line + styled value labels"
+    else
+        warn "Failed to patch charts (now-line / value labels)"
     fi
 }
 

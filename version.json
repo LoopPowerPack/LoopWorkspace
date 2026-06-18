@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.3",
-  "notes": "Caregiver Digest now actually runs on schedule. Before, setting it to Daily or Weekly did nothing — it never sent on its own. Now you get a reminder at a time you pick (Daily or Weekly), and opening the digest when one is due pops the pre-filled message ready to send in one tap. Also renamed the 'iMessage / SMS' option to just 'SMS'.",
+  "latest": "0.3.4",
+  "notes": "The main screen graphs got a refresh. There's now a vertical 'now line' on every graph (Glucose, Active Insulin, Insulin Delivery, Active Carbs) so you can see at a glance where the current moment falls. The value on each graph — your eventual glucose, active insulin, total insulin, and active carbs — is now bigger, bold, and colored to match the graph, with the 'Eventually' label and unit kept smaller and grey.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
