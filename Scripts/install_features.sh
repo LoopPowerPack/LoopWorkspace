@@ -37,11 +37,11 @@ FEATURE_REPO="https://github.com/LoopPowerPack/Loop.git"
 FEATURE_WORKSPACE_REPO="https://raw.githubusercontent.com/LoopPowerPack/LoopWorkspace/${FEATURE_BRANCH}"
 MARKER_FILE=".feature_install_marker"
 
-# Loop version to stamp into VersionOverride.xcconfig after installation.
-# Mirrors upstream Loop's marketing version + build number — affects what
-# iOS shows in Settings → General → iPhone Storage etc.
-FEATURE_VERSION="3.14.0"
-FEATURE_BUILD="58"
+# NOTE: PowerPack intentionally does NOT stamp a Loop marketing/build version.
+# It leaves whatever the user's cloned upstream Loop carries, so the version in
+# Settings always reflects their actual base. (Pinning a hard-coded value here
+# previously DOWNGRADED users on newer upstream, e.g. 3.14.2 shown as 3.14.0.)
+# PowerPack's own version is surfaced separately via PowerPack_BuildInfo.
 
 # PowerPack-specific semver, distinct from Loop's version. Surfaced in the
 # in-app footer (LoopInsights dashboard + FoodFinder Settings) so users can
@@ -489,14 +489,16 @@ setup_source_remote() {
 # announcement on 14 May 2026.)
 
 bump_version() {
-    header "Phase 3b: Setting version to ${FEATURE_VERSION} (${FEATURE_BUILD})"
+    header "Phase 3b: Loop version (left as cloned)"
 
+    # Do NOT overwrite the Loop marketing/build version — keep whatever upstream
+    # the user cloned so Settings reflects their real base. Just report it.
     if [[ -f "VersionOverride.xcconfig" ]]; then
-        sed -i '' "s/LOOP_MARKETING_VERSION = .*/LOOP_MARKETING_VERSION = ${FEATURE_VERSION}/" VersionOverride.xcconfig
-        sed -i '' "s/CURRENT_PROJECT_VERSION = .*/CURRENT_PROJECT_VERSION = ${FEATURE_BUILD}/" VersionOverride.xcconfig
-        success "Version set to ${FEATURE_VERSION} build ${FEATURE_BUILD}"
+        local current
+        current=$(grep -E '^LOOP_MARKETING_VERSION' VersionOverride.xcconfig | sed 's/.*=[[:space:]]*//')
+        info "Keeping Loop version as cloned (${current:-unknown}); PowerPack ${POWERPACK_VERSION}"
     else
-        warn "VersionOverride.xcconfig not found — version not updated"
+        info "VersionOverride.xcconfig not found — leaving version untouched"
     fi
 }
 
