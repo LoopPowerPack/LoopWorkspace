@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.4",
-  "notes": "The main screen graphs got a refresh. There's now a vertical 'now line' on every graph (Glucose, Active Insulin, Insulin Delivery, Active Carbs) so you can see at a glance where the current moment falls. The value on each graph — your eventual glucose, active insulin, total insulin, and active carbs — is now bigger, bold, and colored to match the graph, with the 'Eventually' label and unit kept smaller and grey.",
+  "latest": "0.3.5",
+  "notes": "PowerPack now runs on Loop 3.14.2. This brings in the latest upstream Loop along with Omnipod DASH support via OmnipodKit (plus Medtrum and Eversense). All your PowerPack features are unchanged. If you build it yourself (clone + Xcode), pull the latest and rebuild to move up to 3.14.2.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
