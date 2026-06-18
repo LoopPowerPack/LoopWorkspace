@@ -1653,6 +1653,38 @@ validate_installation() {
         warn "SettingsView.swift is missing AutoPresets row"
     fi
 
+    # Privacy purpose-string gate — HARD FAIL. A build missing any of these keys
+    # is rejected by TestFlight (error 90683) and silently no-ops the matching
+    # in-app permission prompt (e.g. AutoPresets "Allow Calendar Access" does
+    # nothing). This list MUST stay in sync with patch_info_plist (Phase 5b).
+    # Dying here turns a confusing, days-later TestFlight rejection into an
+    # immediate, actionable install error.
+    local plist="Loop/Loop/Info.plist"
+    PLIST_PATH="$plist" python3 - <<'PYEOF' || die "Info.plist privacy-key verification failed (see above). Re-run the installer on a clean clone; if it persists, your build flow is reverting Info.plist after install."
+import os, plistlib, sys
+
+REQUIRED = [
+    "NSPhotoLibraryUsageDescription",
+    "NSMicrophoneUsageDescription",
+    "NSSpeechRecognitionUsageDescription",
+    "NSLocationWhenInUseUsageDescription",
+    "NSLocationAlwaysAndWhenInUseUsageDescription",
+    "NSMotionUsageDescription",
+    "NSCalendarsUsageDescription",
+    "NSCalendarsFullAccessUsageDescription",
+]
+
+with open(os.environ["PLIST_PATH"], "rb") as f:
+    data = plistlib.load(f)
+
+bad = [k for k in REQUIRED if not (isinstance(data.get(k), str) and data[k].strip())]
+if bad:
+    print("  MISSING/EMPTY privacy keys: " + ", ".join(bad))
+    sys.exit(1)
+print("  All %d required privacy purpose strings present" % len(REQUIRED))
+PYEOF
+    success "Privacy purpose strings verified (TestFlight 90683 guard)"
+
     # Write marker file
     echo "installed=$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "Loop/${MARKER_FILE}"
     success "Installation marker written"
