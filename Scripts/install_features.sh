@@ -312,6 +312,7 @@ NEW_FILES=(
 # LoopDataManager.swift (anchor-based — L&L Customizations modify this file heavily),
 # and Localizable.xcstrings (direct checkout — too large for 3-way merge on JSON)
 PATCH_FILES=(
+    "Loop/Managers/LoopAppManager.swift"
     "Loop/View Controllers/StatusTableViewController.swift"
     "Loop/View Models/AddEditFavoriteFoodViewModel.swift"
     "Loop/View Models/CarbEntryViewModel.swift"
