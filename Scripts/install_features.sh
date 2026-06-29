@@ -390,13 +390,13 @@ validate_environment() {
         die "SettingsView.swift not found at expected path."
     fi
 
-    if ! grep -q 'Diabetes Treatment' "$settings_file"; then
-        die "Anchor not found in SettingsView.swift: Diabetes Treatment
+    if ! grep -q 'private var cgmChoices' "$settings_file"; then
+        die "Anchor not found in SettingsView.swift: private var cgmChoices
   Your Loop version may be incompatible."
     fi
 
-    if ! grep -q 'private var cgmChoices' "$settings_file"; then
-        die "Anchor not found in SettingsView.swift: private var cgmChoices
+    if ! grep -q 'fileprivate struct LargeButton' "$settings_file"; then
+        die "Anchor not found in SettingsView.swift: fileprivate struct LargeButton
   Your Loop version may be incompatible."
     fi
     success "SettingsView.swift anchors verified"
@@ -830,65 +830,110 @@ patch_settings_view() {
 import sys
 
 settings_path = sys.argv[1]
-
 with open(settings_path, "r") as f:
     content = f.read()
 
-lines = content.split("\n")
-
-# ─── Anchor 1: Insert feature rows AFTER the Therapy Settings button ───
-# We anchor on "Diabetes Treatment" (the Therapy Settings descriptive text) so our
-# features appear right after Therapy Settings. If L&L Profiles is installed, it
-# inserts before the ForEach — so Profiles ends up BELOW our features.
-
-FEATURE_ROWS = """
-            NavigationLink(destination: AutoPresets_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
-                LargeButton(
-                    action: {},
-                    includeArrow: false,
-                    imageView: AutoPresets_IconView(),
-                    label: NSLocalizedString("AutoPresets", comment: "Title text for button to AutoPresets Settings"),
-                    descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
-                )
-            }
-
-            bolusProSettingsRow
-
-            foodFinderSettingsRow
-
-            loopInsightsSection
-
-            siteAtlasSettingsRow
-"""
-
-anchor1 = 'Diabetes Treatment'
-anchor1_idx = None
-for i, line in enumerate(lines):
-    if anchor1 in line:
-        anchor1_idx = i
-        break
-
-if anchor1_idx is None:
-    print(f"ERROR: Anchor 1 not found: {anchor1}", file=sys.stderr)
+# Guard against double-patching.
+if "powerPackSection" in content:
+    print("ERROR: powerPackSection already present (double-patch?)", file=sys.stderr)
     sys.exit(1)
 
-# Insert the feature rows AFTER the Therapy Settings descriptive text line
-feature_lines = FEATURE_ROWS.rstrip("\n").split("\n")
-insert_at = anchor1_idx + 2  # after the NavigationLink closing brace (line after "Diabetes Treatment")
-for j, fl in enumerate(feature_lines):
-    lines.insert(insert_at + j, fl)
-print(f"  Inserted {len(feature_lines)} lines after Therapy Settings (line {anchor1_idx + 1})")
+# ─── T1: Body — call powerPackSection after configurationSection, tighten gaps ───
+VANILLA_BODY = """                    if viewModel.pumpManagerSettingsViewModel.isSetUp() {
+                        configurationSection
+                    }
+                    deviceSettingsSection"""
 
-# ─── Anchor 2: Insert computed properties BEFORE "private var cgmChoices:" ───
+NEW_BODY = """                    if viewModel.pumpManagerSettingsViewModel.isSetUp() {
+                        configurationSection
+                            .modifier(CompactSectionSpacing())
+                        powerPackSection
+                            .modifier(CompactSectionSpacing())
+                    }
+                    deviceSettingsSection
+                        .modifier(CompactSectionSpacing())"""
 
-COMPUTED_PROPS = """
+if VANILLA_BODY not in content:
+    print("ERROR: T1 body anchor not found", file=sys.stderr)
+    sys.exit(1)
+content = content.replace(VANILLA_BODY, NEW_BODY, 1)
+
+# ─── T2: Computed properties — inserted before `private var cgmChoices` ───
+COMPUTED_PROPS = '''
+    // Branded header that sits above the purple box. "PowerPack" is tinted purple to match the box.
+    private var powerPackHeader: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "bolt.fill")
+                .symbolRenderingMode(.monochrome)
+                .foregroundStyle(Color(red: 107/255, green: 47/255, blue: 160/255)) // force purple; section headers tint symbols gray otherwise
+            (
+                Text(NSLocalizedString("You've powered up with Loop ", comment: "PowerPack settings group header prefix"))
+                    .foregroundColor(.primary)
+                    .fontWeight(.semibold)
+                + Text("PowerPack")
+                    .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
+                    .fontWeight(.heavy)
+            )
+        }
+        // Rounded design reads friendlier/more energetic than the default.
+        .font(.system(size: 17, design: .rounded))
+        .lineLimit(1)                 // keep the whole line together
+        .minimumScaleFactor(0.7)      // shrink just enough to fit narrow widths instead of wrapping
+        .textCase(nil)                // keep natural case; section headers uppercase by default
+        .frame(maxWidth: .infinity, alignment: .leading) // left-justify the line
+        .padding(.top, 28) // breathing room above the block so it sits a bit lower
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 6, trailing: 16)) // flush header to the box's left edge
+    }
+
+    // PowerPack — all bundled apps, grouped together below Therapy Settings inside a thin purple border
+    private var powerPackSection: some View {
+        Section(header: powerPackHeader) {
+            autoPresetsSettingsRow
+                .listRowBackground(PowerPackGroupBorder(position: .top))
+            bolusProSettingsRow
+                .listRowBackground(PowerPackGroupBorder(position: .middle))
+            foodFinderSettingsRow
+                .listRowBackground(PowerPackGroupBorder(position: .middle))
+            loopInsightsSettingsRow
+                .listRowBackground(PowerPackGroupBorder(position: .middle))
+            siteAtlasSettingsRow
+                .listRowBackground(PowerPackGroupBorder(position: .bottom))
+        }
+    }
+
+    private var autoPresetsSettingsRow: some View {
+        NavigationLink(destination: AutoPresets_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
+            LargeButton(
+                action: {},
+                includeArrow: false,
+                imageView: AutoPresets_IconView(),
+                label: NSLocalizedString("AutoPresets", comment: "Title text for button to AutoPresets Settings"),
+                descriptiveText: NSLocalizedString("Automate your presets during motion", comment: "Descriptive text for Auto-Apply Presets")
+            )
+        }
+    }
+
+    private var loopInsightsSettingsRow: some View {
+        NavigationLink(destination: LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "brain.head.profile")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                            .frame(width: 30),
+                        label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
+                        descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
+        }
+    }
+
     // BolusPro — single settings insertion point
     private var bolusProSettingsRow: some View {
         NavigationLink(destination: BolusPro_SettingsView()) {
             LargeButton(action: {},
                         includeArrow: false,
                         imageView: Image(systemName: "drop.halffull")
-                            .foregroundColor(Color(red: 230/255, green: 188/255, blue: 60/255))
+                            .foregroundColor((Color(red: 230/255, green: 188/255, blue: 60/255)))
                             .font(.system(size: 36)),
                         label: NSLocalizedString("BolusPro", comment: "Title text for button to BolusPro Settings"),
                         descriptiveText: NSLocalizedString("Protein & fat-aware bolusing for long absorption meals", comment: "Descriptive text for BolusPro Settings"))
@@ -908,22 +953,7 @@ COMPUTED_PROPS = """
         }
     }
 
-    private var loopInsightsSection: some View {
-        Section {
-            NavigationLink(destination: LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
-                LargeButton(action: {},
-                            includeArrow: false,
-                            imageView: Image(systemName: "brain.head.profile")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
-                                .frame(width: 30),
-                            label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
-                            descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
-            }
-        }
-    }
-
+    // SiteAtlas — single settings insertion point
     private var siteAtlasSettingsRow: some View {
         NavigationLink(destination: SiteAtlas_SettingsView()) {
             LargeButton(action: {},
@@ -932,34 +962,115 @@ COMPUTED_PROPS = """
                             .foregroundColor(Color(red: 230/255, green: 126/255, blue: 34/255))
                             .font(.system(size: 36)),
                         label: NSLocalizedString("Site Atlas", comment: "Title text for button to Site Atlas Settings"),
-                        descriptiveText: NSLocalizedString("Track pump and sensor site rotation", comment: "Descriptive text for Site Atlas"))
+                        descriptiveText: NSLocalizedString("Track pump & sensor site rotation", comment: "Descriptive text for Site Atlas Settings"))
         }
     }
 
-"""
+'''
 
-anchor2 = "private var cgmChoices:"
-anchor2_idx = None
-# Re-scan from scratch since lines array was modified
-for i, line in enumerate(lines):
-    if anchor2 in line:
-        anchor2_idx = i
-        break
-
-if anchor2_idx is None:
-    print(f"ERROR: Anchor 2 not found: {anchor2}", file=sys.stderr)
+anchor2 = "    private var cgmChoices:"
+if anchor2 not in content:
+    print("ERROR: T2 cgmChoices anchor not found", file=sys.stderr)
     sys.exit(1)
+content = content.replace(anchor2, COMPUTED_PROPS.lstrip("\n") + anchor2, 1)
 
-prop_lines = COMPUTED_PROPS.rstrip("\n").split("\n")
-for j, pl in enumerate(prop_lines):
-    lines.insert(anchor2_idx + j, pl)
-print(f"  Inserted {len(prop_lines)} lines before cgmChoices anchor (line {anchor2_idx + 1})")
+# ─── T3: File-scope helper types — inserted before `fileprivate struct LargeButton` ───
+FILE_TYPES = '''// MARK: - PowerPack grouping border
 
-# Write back
+/// Tightens the gap around a section so the PowerPack card sits close to its
+/// neighbors (Algorithm Experiments above, devices below). The gap between two
+/// sections is the larger of their two values, so this is applied to BOTH sides.
+/// No-op below iOS 17 (the API doesn't exist there) — gaps stay default.
+fileprivate struct CompactSectionSpacing: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.listSectionSpacing(8)
+        } else {
+            content
+        }
+    }
+}
+
+/// Which segment of the shared rounded box a PowerPack row draws.
+fileprivate enum PowerPackRowPosition {
+    case top, middle, bottom
+}
+
+/// Draws this row's portion of a single thin purple rounded box that visually
+/// wraps every PowerPack app as one bundle. Why a per-row background instead of
+/// one container: it lets each app stay a native `NavigationLink` row (system
+/// chevron, divider, full-row tap) while the union of segments reads as one box.
+fileprivate struct PowerPackGroupBorder: View {
+    let position: PowerPackRowPosition
+
+    private let purple = Color(red: 107/255, green: 47/255, blue: 160/255)
+    private let cornerRadius: CGFloat = 10
+    private let lineWidth: CGFloat = 1.5
+
+    var body: some View {
+        Color(.secondarySystemGroupedBackground)
+            .overlay(
+                PowerPackBorderShape(position: position, cornerRadius: cornerRadius, lineWidth: lineWidth)
+                    .stroke(purple, lineWidth: lineWidth)
+            )
+    }
+}
+
+fileprivate struct PowerPackBorderShape: Shape {
+    let position: PowerPackRowPosition
+    let cornerRadius: CGFloat
+    let lineWidth: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let inset = lineWidth / 2
+        let left = rect.minX + inset
+        let right = rect.maxX - inset
+        let top = rect.minY + inset
+        let bottom = rect.maxY - inset
+        let r = cornerRadius
+
+        switch position {
+        case .top:
+            // Left + right sides run to the row's bottom edge (open) so they meet
+            // the next row; rounded top-left/top-right corners close the box top.
+            path.move(to: CGPoint(x: left, y: rect.maxY))
+            path.addLine(to: CGPoint(x: left, y: top + r))
+            path.addQuadCurve(to: CGPoint(x: left + r, y: top), control: CGPoint(x: left, y: top))
+            path.addLine(to: CGPoint(x: right - r, y: top))
+            path.addQuadCurve(to: CGPoint(x: right, y: top + r), control: CGPoint(x: right, y: top))
+            path.addLine(to: CGPoint(x: right, y: rect.maxY))
+        case .middle:
+            // Just the two vertical sides, full height, to connect neighbors.
+            path.move(to: CGPoint(x: left, y: rect.minY))
+            path.addLine(to: CGPoint(x: left, y: rect.maxY))
+            path.move(to: CGPoint(x: right, y: rect.minY))
+            path.addLine(to: CGPoint(x: right, y: rect.maxY))
+        case .bottom:
+            // Sides start at the row's top edge (open); rounded bottom corners close it.
+            path.move(to: CGPoint(x: left, y: rect.minY))
+            path.addLine(to: CGPoint(x: left, y: bottom - r))
+            path.addQuadCurve(to: CGPoint(x: left + r, y: bottom), control: CGPoint(x: left, y: bottom))
+            path.addLine(to: CGPoint(x: right - r, y: bottom))
+            path.addQuadCurve(to: CGPoint(x: right, y: bottom - r), control: CGPoint(x: right, y: bottom))
+            path.addLine(to: CGPoint(x: right, y: rect.minY))
+        }
+        return path
+    }
+}
+
+'''
+
+anchor3 = "fileprivate struct LargeButton"
+if anchor3 not in content:
+    print("ERROR: T3 LargeButton anchor not found", file=sys.stderr)
+    sys.exit(1)
+content = content.replace(anchor3, FILE_TYPES + anchor3, 1)
+
 with open(settings_path, "w") as f:
-    f.write("\n".join(lines))
+    f.write(content)
 
-print("  SettingsView.swift patched successfully.")
+print("OK: SettingsView.swift patched (powerPackSection + box + helpers)")
 PYTHON_SCRIPT
 
     if [[ $? -eq 0 ]]; then
