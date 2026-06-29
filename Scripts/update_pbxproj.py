@@ -151,6 +151,7 @@ SOURCE_FILES: list[tuple[str, str, str, str]] = [
     ("View Models/FoodFinder/FoodFinder_SearchViewModel.swift","FoodFinder_SearchViewModel.swift","View Models/FoodFinder","food_finder"),
     ("Views/FoodFinder/FoodFinder_AICameraView.swift",      "FoodFinder_AICameraView.swift",     "Views/FoodFinder",       "food_finder"),
     ("Views/FoodFinder/FoodFinder_RestaurantMenuView.swift","FoodFinder_RestaurantMenuView.swift","Views/FoodFinder",      "food_finder"),
+    ("Views/FoodFinder/FoodFinder_RestaurantItemEntryView.swift","FoodFinder_RestaurantItemEntryView.swift","Views/FoodFinder","food_finder"),
     ("Views/FoodFinder/FoodFinder_CarbTrackingDashboard.swift","FoodFinder_CarbTrackingDashboard.swift","Views/FoodFinder","food_finder"),
     ("Views/FoodFinder/FoodFinder_EntryPoint.swift",        "FoodFinder_EntryPoint.swift",       "Views/FoodFinder",       "food_finder"),
     ("Views/FoodFinder/FoodFinder_FavoritesHelpers.swift",  "FoodFinder_FavoritesHelpers.swift", "Views/FoodFinder",       "food_finder"),

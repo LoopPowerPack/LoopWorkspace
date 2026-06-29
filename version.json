@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.5",
-  "notes": "PowerPack now runs on Loop 3.14.2. This brings in the latest upstream Loop along with Omnipod DASH support via OmnipodKit (plus Medtrum and Eversense). All your PowerPack features are unchanged. If you build it yourself (clone + Xcode), pull the latest and rebuild to move up to 3.14.2.",
+  "latest": "0.3.6",
+  "notes": "FoodFinder now helps when you're dining out. If it detects you're at a restaurant, it asks which spot and what you ordered, then pulls authoritative menu nutrition — saving your AI tokens. No match? It falls back to the usual AI photo analysis, or you can browse the restaurant's full menu. Also: all your PowerPack apps are now grouped together in Settings under a 'You've powered up with Loop PowerPack' banner.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }

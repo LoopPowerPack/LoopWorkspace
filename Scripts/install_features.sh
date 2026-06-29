@@ -49,7 +49,7 @@ MARKER_FILE=".feature_install_marker"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.5"
+POWERPACK_VERSION="0.3.6"
 
 # Colors
 RED='\033[0;31m'
@@ -208,6 +208,7 @@ NEW_FILES=(
     "Loop/Views/FoodFinder/FoodFinder_ScannerView.swift"
     "Loop/Views/FoodFinder/FoodFinder_SearchBar.swift"
     "Loop/Views/FoodFinder/FoodFinder_RestaurantMenuView.swift"
+    "Loop/Views/FoodFinder/FoodFinder_RestaurantItemEntryView.swift"
     "Loop/Views/FoodFinder/FoodFinder_SearchResultsView.swift"
     "Loop/Views/FoodFinder/FoodFinder_SettingsView.swift"
     "Loop/Views/FoodFinder/FoodFinder_VoiceSearchView.swift"
