@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.6",
-  "notes": "FoodFinder now helps when you're dining out. If it detects you're at a restaurant, it asks which spot and what you ordered, then pulls authoritative menu nutrition — saving your AI tokens. No match? It falls back to the usual AI photo analysis, or you can browse the restaurant's full menu. Also: all your PowerPack apps are now grouped together in Settings under a 'You've powered up with Loop PowerPack' banner.",
+  "latest": "0.3.7",
+  "notes": "You can now test your API keys right in Settings before you need them. FoodFinder's Spoonacular (restaurant menus) and USDA (food database) key fields each get a 'Test Connection' button, so you'll know a key works instead of hitting a surprise error mid-meal at a restaurant. We also gave every PowerPack 'Test Connection' button the same clean, consistent look across FoodFinder, LoopInsights, and AutoPresets.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
