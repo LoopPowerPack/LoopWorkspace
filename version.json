@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.7",
-  "notes": "You can now test your API keys right in Settings before you need them. FoodFinder's Spoonacular (restaurant menus) and USDA (food database) key fields each get a 'Test Connection' button, so you'll know a key works instead of hitting a surprise error mid-meal at a restaurant. We also gave every PowerPack 'Test Connection' button the same clean, consistent look across FoodFinder, LoopInsights, and AutoPresets.",
+  "latest": "0.3.8",
+  "notes": "Fixed a crash when tapping a suggestion in LoopInsights Suggestion History — details now open reliably. Also improved AI Meal Debriefs: tapping a meal's AI analysis now opens it in its own full-screen view (just like Suggestion History), so you can focus on one meal and tap Done to get back to your list.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
