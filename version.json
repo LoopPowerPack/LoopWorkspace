@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.9",
-  "notes": "Ask Loopy can now see your last 7 days of data! Ask questions like \"what was my glucose Tuesday night?\" and Loopy will answer from your actual day-by-day glucose, bolus, and carb history — not just averages. Also renamed two home-screen charts for clarity: \"Insulin Delivery (today)\" and \"Active Insulin on Board\".",
+  "latest": "0.3.10",
+  "notes": "Two bug fixes: (1) Scrubbing on a chart no longer shows a preset like \"Walking\" during times it wasn't actually active — the popup now reads Loop's own override history, so preset info is accurate even after app restarts or manual cancels. (2) In Add Carb Entry, changing Servings on an AI-analyzed food now correctly updates the Amount Consumed total — it previously could get stuck at an old value.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
