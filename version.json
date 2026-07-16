@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.10",
-  "notes": "Two bug fixes: (1) Scrubbing on a chart no longer shows a preset like \"Walking\" during times it wasn't actually active — the popup now reads Loop's own override history, so preset info is accurate even after app restarts or manual cancels. (2) In Add Carb Entry, changing Servings on an AI-analyzed food now correctly updates the Amount Consumed total — it previously could get stuck at an old value.",
+  "latest": "0.3.11",
+  "notes": "Site Atlas can now pop up automatically after you change your pod or CGM sensor, so you never forget to log the new site. Turn it on in Settings > Site Atlas > \"Prompt After Site Change\" (off by default). The prompt waits until you're back on the main screen, so it never interrupts pod pairing. Also fixes an issue where the site logging prompt only appeared if the Site Atlas screen happened to be open.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
