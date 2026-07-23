@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.12",
-  "notes": "The Insulin Delivery screen (tap Active Insulin on the main screen) now shows your blood sugar reading next to each bolus, temp basal, suspend, and resume event, so you can see what your glucose was when each dose happened. Timestamps are shorter and text automatically shrinks to fit on one line.",
+  "latest": "0.3.13",
+  "notes": "Insulin Delivery screen polish: the blood sugar reading next to each event now shows as \"@113\" and is color-coded — green when you were in range, yellow when a little out of range, red when well out of range. All rows now use one consistent smaller font so nothing wraps, and timestamps are shorter (just the time for today's events).",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
