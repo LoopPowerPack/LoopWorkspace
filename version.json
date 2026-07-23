@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.13",
-  "notes": "Insulin Delivery screen polish: the blood sugar reading next to each event now shows as \"@113\" and is color-coded — green when you were in range, yellow when a little out of range, red when well out of range. All rows now use one consistent smaller font so nothing wraps, and timestamps are shorter (just the time for today's events).",
+  "latest": "0.3.14",
+  "notes": "Insulin Delivery screen: the \"@\" blood sugar reading next to each event is now color-coded using the standard Time in Range zones — green for 70-180, yellow for 54-69 or 181-250, red below 54 or above 250 — matching the Time in Range numbers on your LoopInsights dashboard. Also fixes an install error some users hit with version 0.3.13.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
