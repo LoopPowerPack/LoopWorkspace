@@ -49,7 +49,7 @@ MARKER_FILE=".feature_install_marker"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.11"
+POWERPACK_VERSION="0.3.12"
 
 # Colors
 RED='\033[0;31m'
@@ -313,6 +313,7 @@ NEW_FILES=(
 PATCH_FILES=(
     "Loop/Managers/DeviceDataManager.swift"
     "Loop/Managers/LoopAppManager.swift"
+    "Loop/View Controllers/InsulinDeliveryTableViewController.swift"
     "Loop/View Controllers/StatusTableViewController.swift"
     "Loop/View Models/AddEditFavoriteFoodViewModel.swift"
     "Loop/View Models/CarbEntryViewModel.swift"
