@@ -56,7 +56,7 @@
 	url = https://github.com/LoopKit/LibreTransmitter.git
 [submodule "OmnipodKit"]
 	path = OmnipodKit
-	url = https://github.com/taylorpatterson-T1D/OmnipodKit
+	url = https://github.com/loopandlearn/OmnipodKit
 [submodule "MedtrumKit"]
 	path = MedtrumKit
 	url = https://github.com/jbr7rr/MedtrumKit
