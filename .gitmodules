@@ -62,4 +62,5 @@
 	url = https://github.com/jbr7rr/MedtrumKit
 [submodule "EversenseKit"]
 	path = EversenseKit
-	url = https://github.com/taylorpatterson-T1D/EversenseKit
+	url = https://github.com/LoopPowerPack/EversenseKit
+	branch = powerpack/loopplugin-infoplist-fix
