@@ -249,6 +249,7 @@ TEST_FILES: list[tuple[str, str, str, str]] = [
     ("LoopInsights/LoopInsights_DataAggregatorTests.swift",  "LoopInsights_DataAggregatorTests.swift",    "LoopTests/LoopInsights", "loop_insights"),
     ("LoopInsights/LoopInsights_ModelsTests.swift",          "LoopInsights_ModelsTests.swift",            "LoopTests/LoopInsights", "loop_insights"),
     ("LoopInsights/LoopInsights_SuggestionStoreTests.swift", "LoopInsights_SuggestionStoreTests.swift",   "LoopTests/LoopInsights", "loop_insights"),
+    ("LoopInsights/LoopInsights_AIAnalysisTests.swift",      "LoopInsights_AIAnalysisTests.swift",        "LoopTests/LoopInsights", "loop_insights"),
 ]
 
 # (group_key, display_name, path, parent_group_key, owning_feature_or_None)

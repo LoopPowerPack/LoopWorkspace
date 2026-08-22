@@ -304,6 +304,7 @@ NEW_FILES=(
     "LoopTests/LoopInsights/LoopInsights_DataAggregatorTests.swift"
     "LoopTests/LoopInsights/LoopInsights_ModelsTests.swift"
     "LoopTests/LoopInsights/LoopInsights_SuggestionStoreTests.swift"
+    "LoopTests/LoopInsights/LoopInsights_AIAnalysisTests.swift"
 )
 
 # Modified files to patch via git diff | git apply --3way
