@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.14",
-  "notes": "Insulin Delivery screen: the \"@\" blood sugar reading next to each event is now color-coded using the standard Time in Range zones — green for 70-180, yellow for 54-69 or 181-250, red below 54 or above 250 — matching the Time in Range numbers on your LoopInsights dashboard. Also fixes an install error some users hit with version 0.3.13.",
+  "latest": "0.3.16",
+  "notes": "LoopInsights fine tuning: when a new analysis runs, its suggestions now replace any older pending suggestions for the same setting, so you will no longer see conflicting ISF, carb ratio, or basal recommendations stacked together. The suggestions list always shows only the newest recommendation for each setting; earlier ones move to history.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
