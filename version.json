@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.17",
-  "notes": "Updated to Loop 3.14.8, the newest LoopKit release. This brings Loop's redesigned home-screen toolbar with larger icons, iOS 27 toolbar fixes, a development-branch warning that shows at most once a week, and new translations. Also: the purple border around the PowerPack section in Settings now shows its rounded corners correctly on iOS 26.",
+  "latest": "0.3.18",
+  "notes": "Updated to Loop 3.14.9, the newest LoopKit release. This includes fixes for Omnipod, Medtrum, and Eversense (including Eversense 365 connection recovery), a fix for a crash that could happen when Loop restarts, no Loop-reset prompt before the app has finished starting, and new translations. Also: LoopInsights now records when it creates an AI suggestion, so suggestion statistics are complete.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
