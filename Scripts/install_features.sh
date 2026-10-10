@@ -400,6 +400,7 @@ PATCH_FILES=(
     "Loop/Views/CarbEntryView.swift"
     "Loop/Views/FavoriteFoodDetailView.swift"
     "Loop/Views/FavoriteFoodsView.swift"
+    "LoopUI/Views/DeviceStatusHUDView.swift"
 )
 
 # Files that should be wholesale-replaced from feat/AllFeatures rather than
