@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.18",
-  "notes": "Updated to Loop 3.14.9, the newest LoopKit release. This includes fixes for Omnipod, Medtrum, and Eversense (including Eversense 365 connection recovery), a fix for a crash that could happen when Loop restarts, no Loop-reset prompt before the app has finished starting, and new translations. Also: LoopInsights now records when it creates an AI suggestion, so suggestion statistics are complete.",
+  "latest": "0.3.19",
+  "notes": "New PowerPack Exclusive: DirectConnect. Loop connects directly to your Dexcom G7, ONE+ or Stelo sensor, so you no longer need the Dexcom app. Pair with the 4-digit applicator code (works with a sensor that is already running), get its own adjustable alarms, optional calibration, and a Connection Health screen. Turn it on in Settings → Add CGM → Dexcom G7/ONE+ using DirectConnect. Also: FoodFinder reads QR codes on food packages, and AutoPresets location triggers have place search. DirectConnect is built on xDrip4iOS by Johan Degraeve.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
