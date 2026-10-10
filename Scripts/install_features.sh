@@ -12,8 +12,8 @@
 #   Loop → Settings.
 #
 #   Bundle contents:
-#     AutoPresets, BolusPro, FoodFinder, LoopInsights, DataLayer,
-#     GraphDetailView, SiteAtlas.
+#     AutoPresets, BolusPro, DirectConnect, FoodFinder, LoopInsights,
+#     DataLayer, GraphDetailView, SiteAtlas.
 #
 # USAGE
 #   ./Scripts/install_features.sh              interactive (default)
@@ -32,7 +32,9 @@ set -euo pipefail
 
 FEATURE_REMOTE="_feature_src"
 FEATURE_BRANCH="feat/installer"
-FEATURE_LOOP_BRANCH="feat/AllFeatures"
+# POWERPACK_LOOP_BRANCH lets a tester install from another Loop branch (for example
+# feat/DirectConnect) before it is merged; releases always use feat/AllFeatures.
+FEATURE_LOOP_BRANCH="${POWERPACK_LOOP_BRANCH:-feat/AllFeatures}"
 FEATURE_REPO="https://github.com/LoopPowerPack/Loop.git"
 FEATURE_WORKSPACE_REPO="https://raw.githubusercontent.com/LoopPowerPack/LoopWorkspace/${FEATURE_BRANCH}"
 MARKER_FILE=".feature_install_marker"
@@ -305,6 +307,79 @@ NEW_FILES=(
     "LoopTests/LoopInsights/LoopInsights_ModelsTests.swift"
     "LoopTests/LoopInsights/LoopInsights_SuggestionStoreTests.swift"
     "LoopTests/LoopInsights/LoopInsights_AIAnalysisTests.swift"
+
+    # DirectConnect — Documentation
+    "Documentation/DirectConnect/DirectConnect_CHANGELOG.md"
+    "Documentation/DirectConnect/DirectConnect_DESIGN.md"
+    "Documentation/DirectConnect/DirectConnect_DEVELOPER.md"
+    "Documentation/DirectConnect/DirectConnect_PLAN.md"
+    "Documentation/DirectConnect/DirectConnect_README.md"
+
+    # DirectConnect — Sources (incl. C crypto, micro-ecc, bridging header, GPL notice)
+    "Loop/Managers/DirectConnect/Crypto/DirectConnect_ECC.c"
+    "Loop/Managers/DirectConnect/Crypto/DirectConnect_ECC.h"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/LICENSE.txt"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/README.md"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/asm_arm.inc"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/asm_arm_mult_square.inc"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/asm_arm_mult_square_umaal.inc"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/curve-specific.inc"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/platform-specific.inc"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/types.h"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/uECC.c"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/uECC.h"
+    "Loop/Managers/DirectConnect/Crypto/micro-ecc/uECC_vli.h"
+    "Loop/Managers/DirectConnect/DirectConnect-Bridging.h"
+    "Loop/Managers/DirectConnect/DirectConnect_AlarmSettings.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_BluetoothManager.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_Bytes.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_ConnectionHealth.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_Diagnostics.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7CGMManager.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7Calibration.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7Certificates.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7Crypto.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7Messages.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7Pairing.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7Sensor.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_G7State.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_GlucoseAlarms.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_KeyStore.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_PeripheralManager.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_RecoveryPolicy.swift"
+    "Loop/Managers/DirectConnect/DirectConnect_SensorModel.swift"
+    "Loop/Managers/DirectConnect/LICENSE-GPL-3.0.txt"
+    "Loop/Resources/DirectConnect/DirectConnect_FeatureFlags.swift"
+    "Loop/Views/DirectConnect/DirectConnect_AlarmSettingsView.swift"
+    "Loop/Views/DirectConnect/DirectConnect_Branding.swift"
+    "Loop/Views/DirectConnect/DirectConnect_CGMManager+UI.swift"
+    "Loop/Views/DirectConnect/DirectConnect_CalibrationView.swift"
+    "Loop/Views/DirectConnect/DirectConnect_DiagnosticsView.swift"
+    "Loop/Views/DirectConnect/DirectConnect_SensorStatusView.swift"
+    "Loop/Views/DirectConnect/DirectConnect_SensorStatusViewModel.swift"
+    "Loop/Views/DirectConnect/DirectConnect_SettingsView.swift"
+    "Loop/Views/DirectConnect/DirectConnect_SetupView.swift"
+    "Loop/Views/DirectConnect/DirectConnect_Tips.swift"
+    "Loop/Views/DirectConnect/DirectConnect_UICoordinator.swift"
+
+    # PowerPack shared — AI model search
+    "Loop/Services/PowerPack/PowerPack_ModelFinder.swift"
+    "Loop/Views/PowerPack/PowerPack_ModelFinderView.swift"
+
+    # DirectConnect — Tests
+    "LoopTests/DirectConnect/DirectConnect_AlarmSettingsTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_ConnectionHealthTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_G7CalibrationTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_G7CryptoTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_G7MessagesTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_G7PairingTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_GlucoseAlarmsTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_RecoveryPolicyTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_SensorModelTests.swift"
+    "LoopTests/DirectConnect/DirectConnect_StateTests.swift"
+
+    # PowerPack shared — Tests
+    "LoopTests/PowerPack/PowerPack_ModelFinderTests.swift"
 )
 
 # Modified files to patch via git diff | git apply --3way
@@ -312,6 +387,8 @@ NEW_FILES=(
 # LoopDataManager.swift (anchor-based — L&L Customizations modify this file heavily),
 # and Localizable.xcstrings (direct checkout — too large for 3-way merge on JSON)
 PATCH_FILES=(
+    "Loop/Extensions/UIAlertController.swift"
+    "Loop/Managers/CGMManager.swift"
     "Loop/Managers/DeviceDataManager.swift"
     "Loop/Managers/LoopAppManager.swift"
     "Loop/View Controllers/InsulinDeliveryTableViewController.swift"
@@ -803,6 +880,15 @@ for key, value in KEYS.items():
         data[key] = value
         added.append(key)
 
+# DirectConnect detects an installed Dexcom G7 app (it would take the sensor back) with
+# canOpenURL("dexcomg7://"), which iOS allows only for schemes listed here.
+schemes = data.setdefault("LSApplicationQueriesSchemes", [])
+if "dexcomg7" not in schemes:
+    schemes.append("dexcomg7")
+    added.append("LSApplicationQueriesSchemes: dexcomg7")
+else:
+    kept.append("LSApplicationQueriesSchemes: dexcomg7")
+
 with open(PLIST, "wb") as f:
     plistlib.dump(data, f)
 
@@ -895,6 +981,8 @@ COMPUTED_PROPS = '''
                 .listRowBackground(PowerPackGroupBorder(position: .top))
             bolusProSettingsRow
                 .listRowBackground(PowerPackGroupBorder(position: .middle))
+            directConnectSettingsRow
+                .listRowBackground(PowerPackGroupBorder(position: .middle))
             foodFinderSettingsRow
                 .listRowBackground(PowerPackGroupBorder(position: .middle))
             loopInsightsSettingsRow
@@ -940,6 +1028,19 @@ COMPUTED_PROPS = '''
                             .font(.system(size: 36)),
                         label: NSLocalizedString("BolusPro", comment: "Title text for button to BolusPro Settings"),
                         descriptiveText: NSLocalizedString("Protein & fat-aware bolusing for long absorption meals", comment: "Descriptive text for BolusPro Settings"))
+        }
+    }
+
+    // DirectConnect — single settings insertion point
+    private var directConnectSettingsRow: some View {
+        NavigationLink(destination: DirectConnect_SettingsView()) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: DirectConnect_Branding.iconName)
+                            .foregroundColor(DirectConnect_Branding.color)
+                            .font(.system(size: 32)),
+                        label: NSLocalizedString("DirectConnect", comment: "Title text for button to DirectConnect Settings"),
+                        descriptiveText: NSLocalizedString("Dexcom G7 / ONE+ / Stelo without the Dexcom app", comment: "Descriptive text for DirectConnect Settings"))
         }
     }
 
@@ -1065,6 +1166,22 @@ if anchor3 not in content:
     print("ERROR: T3 LargeButton anchor not found", file=sys.stderr)
     sys.exit(1)
 content = content.replace(anchor3, FILE_TYPES + anchor3, 1)
+
+# ─── T4: DirectConnect entry in the Add CGM action sheet is shown in purple ───
+VANILLA_ALERT = """            alert.addAction(UIAlertAction(title: action.title, style: .default) { _ in
+                self.isPresented = false
+                action.handler()
+            })"""
+NEW_ALERT = """            let alertAction = UIAlertAction(title: action.title, style: .default) { _ in
+                self.isPresented = false
+                action.handler()
+            }
+            DirectConnect_Branding.style(alertAction) // DirectConnect (PowerPack) — purple entry
+            alert.addAction(alertAction)"""
+if VANILLA_ALERT not in content:
+    print("ERROR: T4 action-sheet anchor not found", file=sys.stderr)
+    sys.exit(1)
+content = content.replace(VANILLA_ALERT, NEW_ALERT, 1)
 
 with open(settings_path, "w") as f:
     f.write(content)
@@ -1728,6 +1845,10 @@ validate_installation() {
         "Loop/Loop/Services/LoopInsights/LoopInsights_DataAggregator.swift"
         "Loop/Loop/Resources/FoodFinder/FoodFinder_FeatureFlags.swift"
         "Loop/Loop/Resources/LoopInsights/LoopInsights_FeatureFlags.swift"
+        "Loop/Loop/Managers/DirectConnect/DirectConnect_G7CGMManager.swift"
+        "Loop/Loop/Managers/DirectConnect/Crypto/micro-ecc/uECC.c"
+        "Loop/Loop/Managers/DirectConnect/DirectConnect-Bridging.h"
+        "Loop/Loop/Views/PowerPack/PowerPack_ModelFinderView.swift"
     )
 
     for f in "${check_files[@]}"; do
@@ -1761,6 +1882,24 @@ validate_installation() {
         success "SettingsView.swift contains AutoPresets row"
     else
         warn "SettingsView.swift is missing AutoPresets row"
+    fi
+
+    if grep -q "directConnectSettingsRow" "$settings_file"; then
+        success "SettingsView.swift contains DirectConnect row"
+    else
+        warn "SettingsView.swift is missing DirectConnect row"
+    fi
+
+    if grep -q "DirectConnect_G7CGMManager" "Loop/Loop/Managers/CGMManager.swift"; then
+        success "CGMManager.swift registers DirectConnect"
+    else
+        warn "CGMManager.swift does not register DirectConnect — it will not appear in the CGM list"
+    fi
+
+    if grep -q "DirectConnect-Bridging.h" "Loop/Loop.xcodeproj/project.pbxproj"; then
+        success "project.pbxproj sets the DirectConnect bridging header"
+    else
+        warn "project.pbxproj is missing the DirectConnect bridging header — the build will fail"
     fi
 
     # Privacy purpose-string gate — HARD FAIL. A build missing any of these keys
@@ -1862,9 +2001,12 @@ rollback() {
         "Loop/Resources/FoodFinder" "Loop/Resources/LoopInsights/TestData" "Loop/Resources/LoopInsights" "Loop/Resources/AutoPresets"
         "Loop/Resources/BolusPro" "Loop/Resources/DataLayer"
         "Loop/Managers/LoopInsights" "Loop/Managers/AutoPresets" "Loop/Managers/DataLayer"
+        "Loop/Managers/DirectConnect/Crypto/micro-ecc" "Loop/Managers/DirectConnect/Crypto"
+        "Loop/Managers/DirectConnect" "Loop/Resources/DirectConnect" "Loop/Views/DirectConnect"
+        "Loop/Services/PowerPack" "Loop/Views/PowerPack"
         "Loop/View Models/FoodFinder" "Loop/View Models/LoopInsights"
-        "LoopTests/FoodFinder" "LoopTests/LoopInsights"
-        "Documentation/FoodFinder" "Documentation/LoopInsights"
+        "LoopTests/FoodFinder" "LoopTests/LoopInsights" "LoopTests/DirectConnect" "LoopTests/PowerPack"
+        "Documentation/FoodFinder" "Documentation/LoopInsights" "Documentation/DirectConnect"
         "Documentation/AutoPresets" "Documentation/BolusPro" "Documentation/SiteAtlas"
         "Documentation/DataLayer" "Documentation/GraphDetailView"
         "Loop/Services" "Loop/Resources"
@@ -1889,6 +2031,9 @@ rollback() {
         "Loop/View Models/FoodFinder" "Loop/View Models/LoopInsights" \
         LoopTests/FoodFinder LoopTests/LoopInsights \
         Documentation/FoodFinder Documentation/LoopInsights \
+        Loop/Managers/DirectConnect Loop/Resources/DirectConnect Loop/Views/DirectConnect \
+        Loop/Services/PowerPack Loop/Views/PowerPack LoopTests/DirectConnect LoopTests/PowerPack \
+        Documentation/DirectConnect \
         2>/dev/null || true
     success "Reset all files to HEAD"
 
@@ -1955,6 +2100,7 @@ show_install_splash() {
     echo
     echo "    • AutoPresets       — auto-activate overrides on detected motion"
     echo "    • BolusPro          — protein/fat-aware bolusing for high-FPU meals"
+    echo "    • DirectConnect ⚡   — Dexcom G7 / ONE+ / Stelo in Loop, no Dexcom app"
     echo "    • FoodFinder        — AI-assisted carb counting (BYO API key)"
     echo "    • LoopInsights      — AI therapy tuning + Behavior Insights"
     echo "    • DataLayer         — local event store with opt-in cloud upload"

@@ -10,7 +10,7 @@ USAGE
   --remove-features <ids>   Comma-separated feature ids to remove
 
   Feature ids: autopresets, bolus_pro, graph_detail_view, site_atlas,
-               food_finder, loop_insights
+               food_finder, loop_insights, direct_connect, powerpack_shared
 
 EXAMPLES
   python3 update_pbxproj.py Loop/Loop.xcodeproj/project.pbxproj
@@ -58,7 +58,13 @@ ALL_FEATURE_IDS = (
     "site_atlas",
     "food_finder",
     "loop_insights",
+    "direct_connect",
+    # AI model search used by FoodFinder, LoopInsights and AutoPresets settings.
+    "powerpack_shared",
 )
+
+# Loop target build setting DirectConnect needs: Swift calls its C P-256 arithmetic.
+BRIDGING_HEADER = "Loop/Managers/DirectConnect/DirectConnect-Bridging.h"
 
 
 def make_uuid(name: str) -> str:
@@ -240,6 +246,43 @@ SOURCE_FILES: list[tuple[str, str, str, str]] = [
     ("Views/SiteAtlas/SiteAtlas_BodyMapView.swift",                "SiteAtlas_BodyMapView.swift",             "Views/SiteAtlas",   "site_atlas"),
     ("Views/SiteAtlas/SiteAtlas_SettingsView.swift",               "SiteAtlas_SettingsView.swift",            "Views/SiteAtlas",   "site_atlas"),
     ("Views/SiteAtlas/SiteAtlas_SiteSelectionSheet.swift",         "SiteAtlas_SiteSelectionSheet.swift",      "Views/SiteAtlas",   "site_atlas"),
+
+    # ── DirectConnect and PowerPack shared ──
+    # micro-ecc sources are #included by DirectConnect_ECC.c and must NOT be compiled on their
+    # own (duplicate symbols), so only DirectConnect_ECC.c is listed; headers need no entry.
+    ("Managers/DirectConnect/Crypto/DirectConnect_ECC.c", "DirectConnect_ECC.c", "Managers/DirectConnect/Crypto", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_AlarmSettings.swift", "DirectConnect_AlarmSettings.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_BluetoothManager.swift", "DirectConnect_BluetoothManager.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_Bytes.swift", "DirectConnect_Bytes.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_ConnectionHealth.swift", "DirectConnect_ConnectionHealth.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_Diagnostics.swift", "DirectConnect_Diagnostics.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7CGMManager.swift", "DirectConnect_G7CGMManager.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7Calibration.swift", "DirectConnect_G7Calibration.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7Certificates.swift", "DirectConnect_G7Certificates.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7Crypto.swift", "DirectConnect_G7Crypto.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7Messages.swift", "DirectConnect_G7Messages.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7Pairing.swift", "DirectConnect_G7Pairing.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7Sensor.swift", "DirectConnect_G7Sensor.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_G7State.swift", "DirectConnect_G7State.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_GlucoseAlarms.swift", "DirectConnect_GlucoseAlarms.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_KeyStore.swift", "DirectConnect_KeyStore.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_PeripheralManager.swift", "DirectConnect_PeripheralManager.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_RecoveryPolicy.swift", "DirectConnect_RecoveryPolicy.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Managers/DirectConnect/DirectConnect_SensorModel.swift", "DirectConnect_SensorModel.swift", "Managers/DirectConnect", "direct_connect"),
+    ("Resources/DirectConnect/DirectConnect_FeatureFlags.swift", "DirectConnect_FeatureFlags.swift", "Resources/DirectConnect", "direct_connect"),
+    ("Services/PowerPack/PowerPack_ModelFinder.swift", "PowerPack_ModelFinder.swift", "Services/PowerPack", "powerpack_shared"),
+    ("Views/DirectConnect/DirectConnect_AlarmSettingsView.swift", "DirectConnect_AlarmSettingsView.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_Branding.swift", "DirectConnect_Branding.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_CGMManager+UI.swift", "DirectConnect_CGMManager+UI.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_CalibrationView.swift", "DirectConnect_CalibrationView.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_DiagnosticsView.swift", "DirectConnect_DiagnosticsView.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_SensorStatusView.swift", "DirectConnect_SensorStatusView.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_SensorStatusViewModel.swift", "DirectConnect_SensorStatusViewModel.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_SettingsView.swift", "DirectConnect_SettingsView.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_SetupView.swift", "DirectConnect_SetupView.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_Tips.swift", "DirectConnect_Tips.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/DirectConnect/DirectConnect_UICoordinator.swift", "DirectConnect_UICoordinator.swift", "Views/DirectConnect", "direct_connect"),
+    ("Views/PowerPack/PowerPack_ModelFinderView.swift", "PowerPack_ModelFinderView.swift", "Views/PowerPack", "powerpack_shared"),
 ]
 
 TEST_FILES: list[tuple[str, str, str, str]] = [
@@ -250,6 +293,17 @@ TEST_FILES: list[tuple[str, str, str, str]] = [
     ("LoopInsights/LoopInsights_ModelsTests.swift",          "LoopInsights_ModelsTests.swift",            "LoopTests/LoopInsights", "loop_insights"),
     ("LoopInsights/LoopInsights_SuggestionStoreTests.swift", "LoopInsights_SuggestionStoreTests.swift",   "LoopTests/LoopInsights", "loop_insights"),
     ("LoopInsights/LoopInsights_AIAnalysisTests.swift",      "LoopInsights_AIAnalysisTests.swift",        "LoopTests/LoopInsights", "loop_insights"),
+    ("DirectConnect/DirectConnect_AlarmSettingsTests.swift", "DirectConnect_AlarmSettingsTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_ConnectionHealthTests.swift", "DirectConnect_ConnectionHealthTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_G7CalibrationTests.swift", "DirectConnect_G7CalibrationTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_G7CryptoTests.swift", "DirectConnect_G7CryptoTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_G7MessagesTests.swift", "DirectConnect_G7MessagesTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_G7PairingTests.swift", "DirectConnect_G7PairingTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_GlucoseAlarmsTests.swift", "DirectConnect_GlucoseAlarmsTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_RecoveryPolicyTests.swift", "DirectConnect_RecoveryPolicyTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_SensorModelTests.swift", "DirectConnect_SensorModelTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("DirectConnect/DirectConnect_StateTests.swift", "DirectConnect_StateTests.swift", "LoopTests/DirectConnect", "direct_connect"),
+    ("PowerPack/PowerPack_ModelFinderTests.swift", "PowerPack_ModelFinderTests.swift", "LoopTests/PowerPack", "powerpack_shared"),
 ]
 
 # (group_key, display_name, path, parent_group_key, owning_feature_or_None)
@@ -301,7 +355,26 @@ SUBGROUPS: list[tuple[str, str, str, str, Optional[str]]] = [
     ("Models/SiteAtlas",        "SiteAtlas",     "SiteAtlas",     "Models",     "site_atlas"),
     ("Services/SiteAtlas",      "SiteAtlas",     "SiteAtlas",     "Services",   "site_atlas"),
     ("Views/SiteAtlas",         "SiteAtlas",     "SiteAtlas",     "Views",      "site_atlas"),
+
+    # DirectConnect feature subgroups (Crypto nests inside Managers/DirectConnect)
+    ("Managers/DirectConnect",        "DirectConnect", "DirectConnect", "Managers",               "direct_connect"),
+    ("Managers/DirectConnect/Crypto", "Crypto",        "Crypto",        "Managers/DirectConnect", "direct_connect"),
+    ("Resources/DirectConnect",       "DirectConnect", "DirectConnect", "Resources",              "direct_connect"),
+    ("Views/DirectConnect",           "DirectConnect", "DirectConnect", "Views",                  "direct_connect"),
+    ("LoopTests/DirectConnect",       "DirectConnect", "DirectConnect", "LoopTests",              "direct_connect"),
+
+    # PowerPack shared subgroups
+    ("Services/PowerPack",      "PowerPack",     "PowerPack",     "Services",   "powerpack_shared"),
+    ("Views/PowerPack",         "PowerPack",     "PowerPack",     "Views",      "powerpack_shared"),
+    ("LoopTests/PowerPack",     "PowerPack",     "PowerPack",     "LoopTests",  "powerpack_shared"),
 ]
+
+
+def file_type(name: str) -> str:
+    """Xcode lastKnownFileType for a manifest file."""
+    if name.endswith(".c"):
+        return "sourcecode.c.c"
+    return "sourcecode.swift"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -524,8 +597,10 @@ def add_features(content: str, feature_ids: set[str]) -> str:
         fr = fileref_uuid(name)
         entry = (
             f"\t\t{fr} /* {name} */ = "
-            f"{{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; "
-            f"path = {name}; sourceTree = \"<group>\"; }};"
+            f"{{isa = PBXFileReference; lastKnownFileType = {file_type(name)}; "
+            # Quoted: names such as DirectConnect_CGMManager+UI.swift contain characters an
+            # unquoted plist string cannot hold, and Xcode then refuses the whole file.
+            f"path = \"{name}\"; sourceTree = \"<group>\"; }};"
         )
         if fr in fileref_block:
             skipped_fr += 1
@@ -601,6 +676,51 @@ def add_features(content: str, feature_ids: set[str]) -> str:
             content = add_to_build_phase(content, test_sources, "\n".join(test_entries))
 
     print(f"    Added {len(src)} source files, {len(tst)} test files, {len(new_group_defs)} new groups")
+    return content
+
+
+def loop_target_config_bodies(content: str) -> list[tuple[int, int]]:
+    """(start, end) spans of the buildSettings bodies of the Loop app target's configurations."""
+    target = re.search(r'/\* Begin PBXNativeTarget section \*/\n(.*?)/\* End PBXNativeTarget section \*/', content, re.DOTALL)
+    if not target:
+        return []
+    m = re.search(r'[A-F0-9]{24} /\* Loop \*/ = \{(.*?)\n\t\t\};', target.group(1), re.DOTALL)
+    if not m:
+        return []
+    bcl = re.search(r'buildConfigurationList = ([A-F0-9]{24})', m.group(1))
+    if not bcl:
+        return []
+    lst = re.search(bcl.group(1) + r' /\*[^\n]*\*/ = \{(.*?)\};', content, re.DOTALL)
+    if not lst:
+        return []
+    spans = []
+    for cfg in re.findall(r'([A-F0-9]{24}) /\* [^*]+ \*/', lst.group(1)):
+        cm = re.search(r'\t\t' + cfg + r' /\*[^\n]*\*/ = \{\n\t\t\tisa = XCBuildConfiguration;.*?buildSettings = \{\n(.*?)\n\t\t\t\};', content, re.DOTALL)
+        if cm:
+            spans.append((cm.start(1), cm.end(1)))
+    return spans
+
+
+def set_bridging_header(content: str, enable: bool) -> str:
+    """Add (or remove) the DirectConnect bridging header on every Loop target configuration.
+    An existing different bridging header is left alone and reported: Swift allows one per target."""
+    line = f'\t\t\t\tSWIFT_OBJC_BRIDGING_HEADER = "{BRIDGING_HEADER}";'
+    changed = 0
+    for start, end in reversed(loop_target_config_bodies(content)):
+        body = content[start:end]
+        if enable:
+            if BRIDGING_HEADER in body:
+                continue
+            if "SWIFT_OBJC_BRIDGING_HEADER" in body:
+                print("  WARNING: Loop target already has a different bridging header; add "
+                      f'#import "Managers/DirectConnect/Crypto/DirectConnect_ECC.h" to it', file=sys.stderr)
+                continue
+            body = body + "\n" + line
+        else:
+            body = "\n".join(l for l in body.split("\n") if BRIDGING_HEADER not in l)
+        content = content[:start] + body + content[end:]
+        changed += 1
+    print(f"    Bridging header {'set' if enable else 'removed'} on {changed} Loop configuration(s)")
     return content
 
 
@@ -683,8 +803,12 @@ def main() -> int:
 
     if rem_set:
         content = remove_features(content, rem_set)
+        if "direct_connect" in rem_set:
+            content = set_bridging_header(content, enable=False)
     if add_set:
         content = add_features(content, add_set)
+        if "direct_connect" in add_set:
+            content = set_bridging_header(content, enable=True)
 
     with open(args.pbxproj, "w") as f:
         f.write(content)
