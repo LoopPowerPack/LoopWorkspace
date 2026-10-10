@@ -2101,7 +2101,7 @@ show_install_splash() {
     echo
     echo "    • AutoPresets       — auto-activate overrides on detected motion"
     echo "    • BolusPro          — protein/fat-aware bolusing for high-FPU meals"
-    echo "    • DirectConnect ⚡   — Dexcom G7 / ONE+ / Stelo in Loop, no Dexcom app"
+    echo "    • DirectConnect ⚡  — Dexcom G7 / ONE+ / Stelo in Loop, no Dexcom app"
     echo "    • FoodFinder        — AI-assisted carb counting (BYO API key)"
     echo "    • LoopInsights      — AI therapy tuning + Behavior Insights"
     echo "    • DataLayer         — local event store with opt-in cloud upload"
