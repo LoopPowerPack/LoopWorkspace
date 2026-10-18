@@ -51,7 +51,7 @@ MARKER_FILE=".feature_install_marker"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.20"
+POWERPACK_VERSION="0.3.21"
 
 # Colors
 RED='\033[0;31m'
@@ -585,6 +585,8 @@ bump_version() {
 
 # ─── Phase 4: Install New Files ──────────────────────────────────────────────
 
+DIRECTCONNECT_SOUNDS_DIR="Loop/DefaultAssets.xcassets/DirectConnectSounds"
+
 install_new_files() {
     header "Phase 4: Installing ${#NEW_FILES[@]} new files"
 
@@ -601,6 +603,17 @@ install_new_files() {
             ((failed++))
         fi
     done
+
+    # DirectConnect alarm sounds: 117 data sets inside an asset catalog the Loop
+    # target already includes, so no project-file entries are needed. Checked
+    # out as one folder instead of 235 manifest lines.
+    if git checkout "${FEATURE_REMOTE}/${FEATURE_LOOP_BRANCH}" -- "$DIRECTCONNECT_SOUNDS_DIR" 2>/dev/null; then
+        ((installed++))
+        success "Installed DirectConnect alarm sounds"
+    else
+        warn "Failed to checkout DirectConnect alarm sounds ($DIRECTCONNECT_SOUNDS_DIR)"
+        ((failed++))
+    fi
 
     # Localizable.xcstrings: direct checkout instead of 3-way merge
     # (71K-line JSON file — too large for reliable diff/apply)
@@ -1990,6 +2003,7 @@ rollback() {
         fi
     done
     success "Removed $removed feature files"
+    rm -rf "$DIRECTCONNECT_SOUNDS_DIR"
 
     # Clean up empty directories
     local feature_dirs=(
