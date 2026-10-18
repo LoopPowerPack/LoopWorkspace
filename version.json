@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.20",
-  "notes": "DirectConnect: adding a new sensor is more reliable. Loop no longer says the sensor did not accept the code when a new sensor is still getting ready; it shows a grey status line and tries again at the sensor's next wake (every 5 minutes). Your previous sensor is left alone while Loop searches for the new one. Also: a \"Last sensor\" line under the CGM display on the main screen.",
+  "latest": "0.3.21",
+  "notes": "DirectConnect alarms can now be heard with your phone on silent. Loop plays each alarm's sound itself. Play Through Silent (on by default for Urgent Low and Falling Fast) plays the alarm even on silent, in a Focus, or with Loop alerts muted, and Urgent Low and Falling Fast keep playing until you open Loop or press OK. Each alarm has its own sound (Loop tones plus the xDrip4iOS sound library) and volume; tap a sound to hear it. After updating, open Settings → CGM → Glucose Alarms and test Urgent Low with your phone on silent.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
