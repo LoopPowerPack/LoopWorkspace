@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.21",
-  "notes": "DirectConnect alarms can now be heard with your phone on silent. Loop plays each alarm's sound itself. Play Through Silent (on by default for Urgent Low and Falling Fast) plays the alarm even on silent, in a Focus, or with Loop alerts muted, and Urgent Low and Falling Fast keep playing until you open Loop or press OK. Each alarm has its own sound (Loop tones plus the xDrip4iOS sound library) and volume; tap a sound to hear it. After updating, open Settings → CGM → Glucose Alarms and test Urgent Low with your phone on silent.",
+  "latest": "0.3.22",
+  "notes": "Save scanned foods to Favorite Foods: after scanning a barcode, tap the heart next to the product name, then Save. The food then appears in Favorite Foods on every new carb entry, so you don't have to scan it again. Site Atlas History is now sorted by date, newest first, with a button to show oldest first. AutoPresets never replaces an override you started yourself, and it ends its own preset after Loop restarts if you are no longer walking or running. BolusPro now shows an alert if its delayed fat and protein carb entry could not be saved.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
