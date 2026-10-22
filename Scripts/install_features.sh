@@ -51,7 +51,7 @@ MARKER_FILE=".feature_install_marker"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.21"
+POWERPACK_VERSION="0.3.22"
 
 # Colors
 RED='\033[0;31m'
@@ -189,6 +189,7 @@ NEW_FILES=(
     # BolusPro — Services
     "Loop/Services/BolusPro/BolusPro_FPUCalculator.swift"
     "Loop/Services/BolusPro/BolusPro_DataLayerHook.swift"
+    "Loop/Services/BolusPro/BolusPro_SaveFailureAlert.swift"
     "Loop/Services/BolusPro/BolusPro_BehaviorAnalyzer.swift"
 
     # BolusPro — Views
@@ -241,6 +242,7 @@ NEW_FILES=(
 
     # DataLayer — Managers
     "Loop/Managers/DataLayer/DataLayer_Coordinator.swift"
+    "Loop/Managers/DataLayer/DataLayer_SettingsChangeEvents.swift"
 
     # DataLayer — Models
     "Loop/Models/DataLayer/DataLayer_EventModels.swift"
@@ -301,6 +303,7 @@ NEW_FILES=(
     "LoopTests/FoodFinder/FoodFinder_BarcodeScannerTests.swift"
     "LoopTests/FoodFinder/FoodFinder_OpenFoodFactsTests.swift"
     "LoopTests/FoodFinder/FoodFinder_VoiceSearchTests.swift"
+    "LoopTests/FoodFinder/FoodFinder_FavoritesTests.swift"
 
     # LoopInsights — Tests
     "LoopTests/LoopInsights/LoopInsights_DataAggregatorTests.swift"
@@ -380,6 +383,12 @@ NEW_FILES=(
 
     # PowerPack shared — Tests
     "LoopTests/PowerPack/PowerPack_ModelFinderTests.swift"
+
+    # AutoPresets, BolusPro, DataLayer, SiteAtlas — Tests
+    "LoopTests/AutoPresets/AutoPresets_CoordinatorTests.swift"
+    "LoopTests/BolusPro/BolusPro_SaveFailureAlertTests.swift"
+    "LoopTests/DataLayer/DataLayer_SettingsChangeEventsTests.swift"
+    "LoopTests/SiteAtlas/SiteAtlas_HistoryGroupingTests.swift"
 )
 
 # Modified files to patch via git diff | git apply --3way
@@ -1323,12 +1332,14 @@ if "BolusPro — save the optional secondary FPU entry" not in content:
     BOLUSPRO_SAVE = """
                 // BolusPro — save the optional secondary FPU entry alongside
                 // the primary. Failure here doesn't roll back the primary
-                // (the user already committed to that bolus); we just log.
+                // (the user already committed to that bolus); we log and
+                // alert through AlertManager so they know the tail isn't covered.
                 if let secondary = bolusProSecondaryEntry {
                     if let storedSecondary = await saveCarbEntry(secondary, replacingEntry: nil) {
                         self.analyticsServicesManager?.didAddCarbs(source: "BolusPro", amount: storedSecondary.quantity.doubleValue(for: .gram()))
                     } else {
                         log.error("BolusPro secondary entry save failed — primary already saved.")
+                        BolusPro_SaveFailureAlert.issue(for: secondary)
                     }
                 }
 
@@ -1442,10 +1453,7 @@ extension LoopDataManager: AutoPresets_Delegate {
 
     func autoPresets(_ coordinator: AutoPresets_Coordinator,
                      shouldDeactivatePreset preset: TemporaryScheduleOverridePreset) {
-        guard let currentOverride = settings.scheduleOverride,
-              case let .preset(currentPreset) = currentOverride.context,
-              currentPreset.id == preset.id
-        else {
+        guard AutoPresets_shouldDeactivate(currentOverride: settings.scheduleOverride, preset: preset) else {
             return
         }
 
@@ -1474,6 +1482,32 @@ extension LoopDataManager: AutoPresets_Delegate {
     }
 }
 """
+
+# ─── Anchor 3: DataLayer override events at the top of mutateSettings ───
+# Every override path (Loop screen, Pre-Meal, Siri, Watch, remote, AutoPresets)
+# goes through mutateSettings. Not fatal if missing: only DataLayer events are lost.
+
+DATALAYER_OVERRIDE_EVENTS = """\
+
+        // DataLayer (PowerPack) — every override path ends here, so record start/end once
+        DataLayer_SettingsChangeEvents.post(
+            DataLayer_SettingsChangeEvents.overrideEvents(old: oldValue.scheduleOverride, new: newValue.scheduleOverride)
+                + DataLayer_SettingsChangeEvents.overrideEvents(old: oldValue.preMealOverride, new: newValue.preMealOverride)
+        )"""
+
+guard_idx = None
+for i, line in enumerate(lines):
+    if line.strip() == "guard oldValue != newValue else {" and i + 2 < len(lines) and lines[i + 2].strip() == "}":
+        guard_idx = i
+        break
+
+if guard_idx is None:
+    print("  WARNING: mutateSettings guard not found — DataLayer override events not installed", file=sys.stderr)
+else:
+    event_lines = DATALAYER_OVERRIDE_EVENTS.split("\n")
+    for j, el in enumerate(event_lines):
+        lines.insert(guard_idx + 3 + j, el)
+    print(f"  Inserted DataLayer override events ({len(event_lines)} lines) after line {guard_idx + 3}")
 
 extension_lines = DELEGATE_EXTENSION.split("\n")
 lines.extend(extension_lines)

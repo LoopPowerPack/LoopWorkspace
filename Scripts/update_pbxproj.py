@@ -126,6 +126,7 @@ SOURCE_FILES: list[tuple[str, str, str, str]] = [
     ("Resources/BolusPro/BolusPro_FeatureFlags.swift",                 "BolusPro_FeatureFlags.swift",               "Resources/BolusPro",  "bolus_pro"),
     ("Services/BolusPro/BolusPro_FPUCalculator.swift",                 "BolusPro_FPUCalculator.swift",              "Services/BolusPro",   "bolus_pro"),
     ("Services/BolusPro/BolusPro_DataLayerHook.swift",                 "BolusPro_DataLayerHook.swift",              "Services/BolusPro",   "bolus_pro"),
+    ("Services/BolusPro/BolusPro_SaveFailureAlert.swift",              "BolusPro_SaveFailureAlert.swift",           "Services/BolusPro",   "bolus_pro"),
     ("Services/BolusPro/BolusPro_BehaviorAnalyzer.swift",              "BolusPro_BehaviorAnalyzer.swift",           "Services/BolusPro",   "bolus_pro"),
     ("Views/BolusPro/BolusPro_InfoSheet.swift",                        "BolusPro_InfoSheet.swift",                  "Views/BolusPro",      "bolus_pro"),
     ("Views/BolusPro/BolusPro_OnboardingView.swift",                   "BolusPro_OnboardingView.swift",             "Views/BolusPro",      "bolus_pro"),
@@ -172,6 +173,7 @@ SOURCE_FILES: list[tuple[str, str, str, str]] = [
     ("Managers/LoopInsights/LoopInsights_BackgroundMonitor.swift", "LoopInsights_BackgroundMonitor.swift", "Managers/LoopInsights", "loop_insights"),
     ("Managers/LoopInsights/LoopInsights_Coordinator.swift",       "LoopInsights_Coordinator.swift",       "Managers/LoopInsights", "loop_insights"),
     ("Managers/DataLayer/DataLayer_Coordinator.swift",             "DataLayer_Coordinator.swift",          "Managers/DataLayer",    "loop_insights"),
+    ("Managers/DataLayer/DataLayer_SettingsChangeEvents.swift",    "DataLayer_SettingsChangeEvents.swift", "Managers/DataLayer",    "loop_insights"),
     ("Models/LoopInsights/LoopInsights_Models.swift",              "LoopInsights_Models.swift",            "Models/LoopInsights",   "loop_insights"),
     ("Models/LoopInsights/LoopInsights_MFPModels.swift",           "LoopInsights_MFPModels.swift",         "Models/LoopInsights",   "loop_insights"),
     ("Models/LoopInsights/LoopInsights_Phase5Models.swift",        "LoopInsights_Phase5Models.swift",      "Models/LoopInsights",   "loop_insights"),
@@ -289,6 +291,7 @@ TEST_FILES: list[tuple[str, str, str, str]] = [
     ("FoodFinder/FoodFinder_BarcodeScannerTests.swift",      "FoodFinder_BarcodeScannerTests.swift",      "LoopTests/FoodFinder",   "food_finder"),
     ("FoodFinder/FoodFinder_OpenFoodFactsTests.swift",       "FoodFinder_OpenFoodFactsTests.swift",       "LoopTests/FoodFinder",   "food_finder"),
     ("FoodFinder/FoodFinder_VoiceSearchTests.swift",         "FoodFinder_VoiceSearchTests.swift",         "LoopTests/FoodFinder",   "food_finder"),
+    ("FoodFinder/FoodFinder_FavoritesTests.swift",           "FoodFinder_FavoritesTests.swift",           "LoopTests/FoodFinder",   "food_finder"),
     ("LoopInsights/LoopInsights_DataAggregatorTests.swift",  "LoopInsights_DataAggregatorTests.swift",    "LoopTests/LoopInsights", "loop_insights"),
     ("LoopInsights/LoopInsights_ModelsTests.swift",          "LoopInsights_ModelsTests.swift",            "LoopTests/LoopInsights", "loop_insights"),
     ("LoopInsights/LoopInsights_SuggestionStoreTests.swift", "LoopInsights_SuggestionStoreTests.swift",   "LoopTests/LoopInsights", "loop_insights"),
@@ -304,6 +307,10 @@ TEST_FILES: list[tuple[str, str, str, str]] = [
     ("DirectConnect/DirectConnect_SensorModelTests.swift", "DirectConnect_SensorModelTests.swift", "LoopTests/DirectConnect", "direct_connect"),
     ("DirectConnect/DirectConnect_StateTests.swift", "DirectConnect_StateTests.swift", "LoopTests/DirectConnect", "direct_connect"),
     ("PowerPack/PowerPack_ModelFinderTests.swift", "PowerPack_ModelFinderTests.swift", "LoopTests/PowerPack", "powerpack_shared"),
+    ("AutoPresets/AutoPresets_CoordinatorTests.swift", "AutoPresets_CoordinatorTests.swift", "LoopTests/AutoPresets", "autopresets"),
+    ("BolusPro/BolusPro_SaveFailureAlertTests.swift", "BolusPro_SaveFailureAlertTests.swift", "LoopTests/BolusPro", "bolus_pro"),
+    ("DataLayer/DataLayer_SettingsChangeEventsTests.swift", "DataLayer_SettingsChangeEventsTests.swift", "LoopTests/DataLayer", "loop_insights"),
+    ("SiteAtlas/SiteAtlas_HistoryGroupingTests.swift", "SiteAtlas_HistoryGroupingTests.swift", "LoopTests/SiteAtlas", "site_atlas"),
 ]
 
 # (group_key, display_name, path, parent_group_key, owning_feature_or_None)
@@ -322,12 +329,14 @@ SUBGROUPS: list[tuple[str, str, str, str, Optional[str]]] = [
     ("Services/AutoPresets",    "AutoPresets",   "AutoPresets",   "Services",   "autopresets"),
     ("Resources/AutoPresets",   "AutoPresets",   "AutoPresets",   "Resources",  "autopresets"),
     ("Views/AutoPresets",       "AutoPresets",   "AutoPresets",   "Views",      "autopresets"),
+    ("LoopTests/AutoPresets",   "AutoPresets",   "AutoPresets",   "LoopTests",  "autopresets"),
 
     # BolusPro feature subgroups
     ("Models/BolusPro",         "BolusPro",      "BolusPro",      "Models",     "bolus_pro"),
     ("Resources/BolusPro",      "BolusPro",      "BolusPro",      "Resources",  "bolus_pro"),
     ("Services/BolusPro",       "BolusPro",      "BolusPro",      "Services",   "bolus_pro"),
     ("Views/BolusPro",          "BolusPro",      "BolusPro",      "Views",      "bolus_pro"),
+    ("LoopTests/BolusPro",      "BolusPro",      "BolusPro",      "LoopTests",  "bolus_pro"),
 
     # FoodFinder feature subgroups
     ("Models/FoodFinder",       "FoodFinder",    "FoodFinder",    "Models",     "food_finder"),
@@ -350,11 +359,13 @@ SUBGROUPS: list[tuple[str, str, str, str, Optional[str]]] = [
     ("Views/LoopInsights",      "LoopInsights",  "LoopInsights",  "Views",      "loop_insights"),
     ("Views/DataLayer",         "DataLayer",     "DataLayer",     "Views",      "loop_insights"),
     ("LoopTests/LoopInsights",  "LoopInsights",  "LoopInsights",  "LoopTests",  "loop_insights"),
+    ("LoopTests/DataLayer",     "DataLayer",     "DataLayer",     "LoopTests",  "loop_insights"),
 
     # SiteAtlas feature subgroups
     ("Models/SiteAtlas",        "SiteAtlas",     "SiteAtlas",     "Models",     "site_atlas"),
     ("Services/SiteAtlas",      "SiteAtlas",     "SiteAtlas",     "Services",   "site_atlas"),
     ("Views/SiteAtlas",         "SiteAtlas",     "SiteAtlas",     "Views",      "site_atlas"),
+    ("LoopTests/SiteAtlas",     "SiteAtlas",     "SiteAtlas",     "LoopTests",  "site_atlas"),
 
     # DirectConnect feature subgroups (Crypto nests inside Managers/DirectConnect)
     ("Managers/DirectConnect",        "DirectConnect", "DirectConnect", "Managers",               "direct_connect"),
