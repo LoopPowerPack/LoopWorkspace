@@ -1,5 +1,5 @@
 {
-  "latest": "0.3.22",
-  "notes": "Save scanned foods to Favorite Foods: after scanning a barcode, tap the heart next to the product name, then Save. The food then appears in Favorite Foods on every new carb entry, so you don't have to scan it again. Site Atlas History is now sorted by date, newest first, with a button to show oldest first. AutoPresets never replaces an override you started yourself, and it ends its own preset after Loop restarts if you are no longer walking or running. BolusPro now shows an alert if its delayed fat and protein carb entry could not be saved.",
+  "latest": "0.3.23",
+  "notes": "DirectConnect: the instructions for changing a sensor are now the same everywhere in Loop. Insert the new sensor, then delete the old CGM (Settings → CGM → Delete CGM), add Dexcom G7/ONE+ using DirectConnect, and enter the new sensor's 4-digit pairing code. The sensor screen now shows time left in hours and minutes during the last day, instead of rounding up to whole hours. The installer (Option B) now works with Loop 3.14.11.",
   "url": "https://github.com/LoopPowerPack/LoopWorkspace"
 }
