@@ -1350,6 +1350,15 @@ if "BolusPro — save the optional secondary FPU entry" not in content:
                     BolusPro_DataLayerHook.recordSavedEntry(snapshot)
                 }
 """
+    # Loop 3.14.11 dropped the amount: parameter from didAddCarbs; follow
+    # whatever signature the user's upstream "Phone" call uses.
+    phone_idx = find_line('self.analyticsServicesManager?.didAddCarbs(source: "Phone"')
+    if phone_idx is not None and "amount:" not in lines[phone_idx]:
+        BOLUSPRO_SAVE = BOLUSPRO_SAVE.replace(
+            'didAddCarbs(source: "BolusPro", amount: storedSecondary.quantity.doubleValue(for: .gram()))',
+            'didAddCarbs(source: "BolusPro")')
+        print("  Using didAddCarbs(source:) (upstream Loop 3.14.11+ signature)")
+
     # Prefer to insert right after the onCarbEntrySaved call line if present
     # in this run; otherwise fall back to the Phone didAddCarbs anchor.
     idx = find_line('self.onCarbEntrySaved?(storedCarbEntry)')
