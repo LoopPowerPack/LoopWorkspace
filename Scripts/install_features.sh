@@ -51,7 +51,7 @@ MARKER_FILE=".feature_install_marker"
 # meaningful releases (new feature shipping, major bug fix, etc.) and tag
 # the corresponding commit on LoopPowerPack/Loop with the same value
 # (e.g., `git tag powerpack-0.2.0`) so version-to-commit lookups are easy.
-POWERPACK_VERSION="0.3.24"
+POWERPACK_VERSION="0.3.25"
 
 # Colors
 RED='\033[0;31m'
@@ -366,6 +366,7 @@ NEW_FILES=(
     "Loop/Views/DirectConnect/DirectConnect_UICoordinator.swift"
 
     # PowerPack shared — AI model search
+    "Loop/Services/PowerPack/PowerPack_AIRequestOptions.swift"
     "Loop/Services/PowerPack/PowerPack_ModelFinder.swift"
     "Loop/Views/PowerPack/PowerPack_ModelFinderView.swift"
 
@@ -382,6 +383,7 @@ NEW_FILES=(
     "LoopTests/DirectConnect/DirectConnect_StateTests.swift"
 
     # PowerPack shared — Tests
+    "LoopTests/PowerPack/PowerPack_AIRequestOptionsTests.swift"
     "LoopTests/PowerPack/PowerPack_ModelFinderTests.swift"
 
     # AutoPresets, BolusPro, DataLayer, SiteAtlas — Tests
