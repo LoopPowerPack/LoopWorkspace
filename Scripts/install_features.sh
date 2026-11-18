@@ -847,6 +847,13 @@ patch_modified_files() {
             continue
         fi
 
+        # Build-script customizations (e.g. Loop and Learn's) edit files without
+        # staging them; `git apply --3way` refuses any file whose working copy
+        # differs from the index ("does not match index"). Staging first makes
+        # the customized file the merge's "ours" side. Rollback still restores
+        # it with `git checkout HEAD -- .`.
+        git add -- "$file" 2>/dev/null || true
+
         # Check for markers too: a file with conflict markers fails the Xcode
         # build, so it must never count as patched.
         if echo "$diff_output" | git apply --3way 2>/dev/null \
