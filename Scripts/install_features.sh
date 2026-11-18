@@ -561,13 +561,22 @@ setup_source_remote() {
     fi
 
     git remote add "$FEATURE_REMOTE" "$FEATURE_REPO"
-    git fetch "$FEATURE_REMOTE" "$FEATURE_LOOP_BRANCH" --depth=1
+    # Depth 200 (not 1) so Phase 5 can tell whether the user's Loop commit is
+    # already inside feat/AllFeatures' history (see patch_modified_files).
+    git fetch "$FEATURE_REMOTE" "$FEATURE_LOOP_BRANCH" --depth=200
     success "Fetched ${FEATURE_LOOP_BRANCH} from ${FEATURE_REPO}"
 
     # Also fetch dev — our feature branch was based on dev, so we need it as the diff base
     # even when the user cloned main (which is the L&L-compatible path)
-    git fetch "$FEATURE_REMOTE" dev --depth=1
+    git fetch "$FEATURE_REMOTE" dev --depth=200
     success "Fetched dev ref for diff base"
+
+    # Build scripts clone Loop shallow; without some history of the user's own
+    # commit, the ancestry checks in Phase 5 cannot run. Failure is harmless:
+    # Phase 5 then falls back to dev as the diff base.
+    if [[ "$(git rev-parse --is-shallow-repository 2>/dev/null)" == "true" ]]; then
+        git fetch --deepen=200 origin >/dev/null 2>&1 || warn "Could not deepen Loop history (diff base falls back to dev)"
+    fi
 
     popd > /dev/null
 }
@@ -809,13 +818,28 @@ patch_modified_files() {
         die "Cannot find dev branch reference. The feature remote fetch may have failed."
     fi
 
+    # The upstream-probe workflow merges LoopKit/Loop:dev into feat/AllFeatures
+    # before our dev branch is moved forward. A user whose Loop already has
+    # those upstream commits would then get them applied a second time
+    # (2026-11-18: duplicate applyFullBleedBackground() and conflict markers in
+    # StatusTableViewController). When the user's commit is in feat/AllFeatures'
+    # history and is newer than dev, diff from the user's commit instead.
+    local feature_ref="${FEATURE_REMOTE}/${FEATURE_LOOP_BRANCH}"
+    local user_base
+    user_base=$(git merge-base HEAD "$feature_ref" 2>/dev/null || true)
+    if [[ -n "$user_base" && "$user_base" != "$dev_ref" ]] \
+        && git merge-base --is-ancestor "$dev_ref" "$user_base" 2>/dev/null; then
+        info "Your Loop (${user_base:0:8}) is newer than PowerPack dev (${dev_ref:0:8}); using it as the diff base"
+        dev_ref="$user_base"
+    fi
+
     local patched=0
     local failed=0
     local skipped=0
 
     for file in "${PATCH_FILES[@]}"; do
         local diff_output
-        diff_output=$(git diff "$dev_ref".."${FEATURE_REMOTE}/${FEATURE_LOOP_BRANCH}" -- "$file" 2>/dev/null)
+        diff_output=$(git diff "$dev_ref".."$feature_ref" -- "$file" 2>/dev/null)
 
         if [[ -z "$diff_output" ]]; then
             info "No changes for: $file (skipped)"
@@ -823,12 +847,14 @@ patch_modified_files() {
             continue
         fi
 
-        if echo "$diff_output" | git apply --3way 2>/dev/null; then
+        # Check for markers too: a file with conflict markers fails the Xcode
+        # build, so it must never count as patched.
+        if echo "$diff_output" | git apply --3way 2>/dev/null \
+            && ! grep -qE '^(<<<<<<<|>>>>>>>)( |$)' "$file"; then
             success "Patched: $file"
             ((patched++))
         else
-            warn "3-way merge had conflicts for: $file"
-            warn "  → Check for conflict markers and resolve manually."
+            error "3-way merge had conflicts for: $file"
             ((failed++))
         fi
     done
@@ -837,7 +863,9 @@ patch_modified_files() {
 
     info "Patched: $patched, Skipped: $skipped, Conflicts: $failed"
     if [[ $failed -gt 0 ]]; then
-        warn "Some files had merge conflicts. Resolve them before building."
+        die "Install stopped: $failed file(s) have merge conflicts and would fail the build.
+  Undo this install with: ./Scripts/install_features.sh --rollback
+  Then report the files listed above to PowerPack."
     fi
 }
 
