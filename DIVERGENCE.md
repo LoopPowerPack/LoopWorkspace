@@ -133,10 +133,12 @@ Plus shared infrastructure:
 
 ## What PowerPack tracks from upstream
 
-PowerPack tracks `LoopKit/Loop:dev` — the active upstream mainline.
-LoopKit/Loop's `main` branch is no longer maintained (last commit
-April 2025; confirmed by LoopKit maintainer Marion Barker). `dev` is
-where new pump/CGM driver work, bug fixes, and feature work land.
+PowerPack tracks LoopKit's **released** Loop: the commit that
+`LoopKit/LoopWorkspace` `main` pins for each release. LoopKit/Loop's own
+`main` branch is no longer maintained (last commit April 2025; confirmed
+by LoopKit maintainer Marion Barker). `LoopKit/Loop:dev` is where new
+pump/CGM driver work, bug fixes and feature work land; PowerPack takes
+that work once LoopKit releases it.
 
 PowerPack does not currently ship:
 - Any **experimental upstream feature flags** that are off by default
@@ -148,12 +150,17 @@ PowerPack does not currently ship:
 
 ## Upstream-merge cadence
 
+PowerPack follows LoopKit's **released** code: the Loop commit that
+`LoopKit/LoopWorkspace` `main` pins. Unreleased work on `LoopKit/Loop`
+`dev` is not pulled, and `LoopKit/Loop` `main` is not used (it is no
+longer maintained).
+
 | Trigger | Action |
 |---|---|
-| Upstream `dev` security/critical fix | Merged within 7 days |
-| Upstream `dev` pump/CGM driver update | Merged within 14 days |
-| Routine upstream `dev` activity | Merged on a weekly automated probe (`upstream-probe.yml` GitHub Action). Conflict-free merges are pushed automatically; conflicts open an issue for manual resolution |
-| Upstream `main` activity | Not pulled. The branch is dormant. |
+| New LoopKit release with a security/critical fix | Merged within 7 days |
+| New LoopKit release with a pump/CGM driver update | Merged within 14 days |
+| Any other new LoopKit release | Merged on a weekly automated probe (`upstream-probe.yml` GitHub Action). Conflict-free merges are pushed automatically, and PowerPack's `dev` branch is then moved to the same release commit; conflicts open an issue for manual resolution |
+| Unreleased `LoopKit/Loop` `dev` activity | Not pulled until LoopKit releases it |
 
 Merge events are visible in the commit history of `feat/AllFeatures`
 and posted to the project's GitHub Discussions.
