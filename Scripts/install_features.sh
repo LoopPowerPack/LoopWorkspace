@@ -1966,10 +1966,10 @@ validate_installation() {
         warn "SettingsView.swift is missing FoodFinder row"
     fi
 
-    if grep -q "loopInsightsSection" "$settings_file"; then
-        success "SettingsView.swift contains LoopInsights section"
+    if grep -q "loopInsightsSettingsRow" "$settings_file"; then
+        success "SettingsView.swift contains LoopInsights row"
     else
-        warn "SettingsView.swift is missing LoopInsights section"
+        warn "SettingsView.swift is missing LoopInsights row"
     fi
 
     if grep -q "AutoPresets_SettingsView" "$settings_file"; then
