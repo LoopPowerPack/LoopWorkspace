@@ -12,7 +12,7 @@ jobs:
   identifiers:
     name: Add Identifiers
     needs: validate
-    runs-on: macos-26
+    runs-on: macos-15-intel
     steps:
       # Checks-out the repo
       - name: Checkout Repo
