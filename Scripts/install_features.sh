@@ -391,6 +391,21 @@ NEW_FILES=(
     "LoopTests/BolusPro/BolusPro_SaveFailureAlertTests.swift"
     "LoopTests/DataLayer/DataLayer_SettingsChangeEventsTests.swift"
     "LoopTests/SiteAtlas/SiteAtlas_HistoryGroupingTests.swift"
+
+    # PowerProfiles (percentage changes to Profiles; Profiles itself is installed in LoopKit, Phase 8c)
+    "Documentation/PowerProfiles/PowerProfiles_README.md"
+    "Loop/Models/PowerProfiles/PowerProfiles_Models.swift"
+    "Loop/Models/PowerProfiles/PowerProfiles_Scaler.swift"
+    "Loop/Services/PowerProfiles/PowerProfiles_ProfileStore.swift"
+    "Loop/Services/PowerProfiles/PowerProfiles_UndoStore.swift"
+    "Loop/Services/PowerProfiles/PowerProfiles_Coordinator.swift"
+    "Loop/View Models/PowerProfiles/PowerProfiles_ViewModel.swift"
+    "Loop/Views/PowerProfiles/PowerProfiles_View.swift"
+    "Loop/Views/PowerProfiles/PowerProfiles_ProfilesPage.swift"
+    "LoopTests/PowerProfiles/PowerProfiles_ModelsTests.swift"
+    "LoopTests/PowerProfiles/PowerProfiles_ScalerTests.swift"
+    "LoopTests/PowerProfiles/PowerProfiles_ProfileStoreTests.swift"
+    "LoopTests/PowerProfiles/PowerProfiles_UndoTests.swift"
 )
 
 # Modified files to patch via git diff | git apply --3way
@@ -1243,6 +1258,52 @@ if VANILLA_ALERT not in content:
     sys.exit(1)
 content = content.replace(VANILLA_ALERT, NEW_ALERT, 1)
 
+# ─── T5: Profiles button opening the Profiles page with the PowerProfiles bar ───
+PROFILES_NOTE = """            // PowerPack: PowerProfiles is switched on and off on the Profiles page
+            Button(action: { showProfiles = true }) {
+                Text(NSLocalizedString("Includes PowerProfiles", comment: "PowerPack note under the Profiles button"))
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
+            }
+
+"""
+PLUGIN_ANCHOR = "            ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in"
+LL_PROFILE_VIEW = "ProfileView(viewModel: ProfileViewModel("
+if PLUGIN_ANCHOR not in content:
+    print("ERROR: T5 configuration-section anchor not found", file=sys.stderr)
+    sys.exit(1)
+if LL_PROFILE_VIEW in content:
+    # The Loop and Learn Profiles customization already added the button and its sheet.
+    content = content.replace(LL_PROFILE_VIEW, "PowerProfiles_ProfilesPage(viewModel: ProfileViewModel(", 1)
+else:
+    STATE_ANCHOR = "    @State private var sheet: Destination.Sheet?\n"
+    if STATE_ANCHOR not in content:
+        print("ERROR: T5 state anchor not found", file=sys.stderr)
+        sys.exit(1)
+    content = content.replace(STATE_ANCHOR, STATE_ANCHOR + "    @State private var showProfiles = false\n", 1)
+    PROFILES_BUTTON = """            LargeButton(action: { showProfiles = true },
+                        includeArrow: true,
+                        imageView: AnyView(Image(systemName: "arrow.triangle.2.circlepath").font(.system(size: 30, weight: .bold))),
+                        label: NSLocalizedString("Profiles", comment: "Title text for button to Profiles"),
+                        descriptiveText: NSLocalizedString("Switch between profiles for different scenarios", comment: "Descriptive text for Profiles"))
+            .sheet(isPresented: $showProfiles) {
+                PowerProfiles_ProfilesPage(viewModel: ProfileViewModel(therapySettings: self.viewModel.therapySettings(),
+                                                        sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
+                                                        adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
+                                                        delegate: self.viewModel.therapySettingsViewModelDelegate))
+                .environmentObject(displayGlucosePreference)
+                .environment(\\.dismissAction, self.dismiss)
+                .environment(\\.appName, self.appName)
+                .environment(\\.chartColorPalette, .primary)
+                .environment(\\.carbTintColor, self.carbTintColor)
+                .environment(\\.glucoseTintColor, self.glucoseTintColor)
+                .environment(\\.guidanceColors, self.guidanceColors)
+                .environment(\\.insulinTintColor, self.insulinTintColor)
+            }
+"""
+    PROFILES_NOTE = PROFILES_BUTTON + PROFILES_NOTE
+content = content.replace(PLUGIN_ANCHOR, PROFILES_NOTE + PLUGIN_ANCHOR, 1)
+
 with open(settings_path, "w") as f:
     f.write(content)
 
@@ -1575,6 +1636,60 @@ PYTHON_SCRIPT
 }
 
 # ─── Phase 7: Update project.pbxproj ─────────────────────────────────────────
+
+# ─── Phase 8c: Profiles in LoopKit ───────────────────────────────────────────
+#
+# Profiles (profile save and load, Loop and Learn customization by Jonas
+# Björkert) lives in LoopKitUI. PowerProfiles needs it. When the user already
+# applied the Loop and Learn Profiles customization, it is left as it is.
+# Otherwise PowerPack's copy (same files, without the remote profile switch)
+# is applied, and a copy of the patch is kept as the marker so rollback can
+# remove exactly what it added.
+
+PROFILES_LOOPKIT_MARKER="LoopKit/.powerpack_profiles.patch"
+
+install_profiles_loopkit() {
+    header "Phase 8c: Installing Profiles in LoopKit"
+
+    if [[ -f "LoopKit/LoopKitUI/ViewModels/ProfileViewModel.swift" ]]; then
+        info "Profiles already present in LoopKit (Loop and Learn customization or an earlier install) — left as is"
+        return
+    fi
+
+    local patch_src=""
+    if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ "${BASH_SOURCE[0]}" != "bash" ]]; then
+        local script_dir
+        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+        if [[ -f "${script_dir}/../patches/powerpack_profiles_loopkit.patch" ]]; then
+            patch_src="${script_dir}/../patches/powerpack_profiles_loopkit.patch"
+        fi
+    fi
+    if [[ -z "$patch_src" ]]; then
+        info "Downloading powerpack_profiles_loopkit.patch..."
+        mkdir -p Scripts
+        curl -fsSL "${FEATURE_WORKSPACE_REPO}/patches/powerpack_profiles_loopkit.patch" -o Scripts/powerpack_profiles_loopkit.patch \
+            || die "Failed to download powerpack_profiles_loopkit.patch from GitHub."
+        patch_src="Scripts/powerpack_profiles_loopkit.patch"
+    fi
+
+    cp "$patch_src" "$PROFILES_LOOPKIT_MARKER"
+    if (cd LoopKit && git apply --whitespace=nowarn "$(basename "$PROFILES_LOOPKIT_MARKER")"); then
+        success "Profiles installed in LoopKit"
+    else
+        rm -f "$PROFILES_LOOPKIT_MARKER"
+        die "Could not apply Profiles to LoopKit. Undo this install with: ./Scripts/install_features.sh --rollback"
+    fi
+}
+
+rollback_profiles_loopkit() {
+    [[ -f "$PROFILES_LOOPKIT_MARKER" ]] || return 0
+    if (cd LoopKit && git apply -R --whitespace=nowarn "$(basename "$PROFILES_LOOPKIT_MARKER")"); then
+        rm -f "$PROFILES_LOOPKIT_MARKER"
+        success "Removed Profiles from LoopKit"
+    else
+        warn "Could not remove Profiles from LoopKit; the patch is kept at $PROFILES_LOOPKIT_MARKER"
+    fi
+}
 
 update_pbxproj() {
     header "Phase 7: Updating project.pbxproj"
@@ -1984,6 +2099,13 @@ validate_installation() {
         warn "SettingsView.swift is missing DirectConnect row"
     fi
 
+    if grep -q "PowerProfiles_ProfilesPage" "$settings_file" \
+        && [[ -f "LoopKit/LoopKitUI/ViewModels/ProfileViewModel.swift" ]]; then
+        success "Profiles and PowerProfiles installed"
+    else
+        warn "Profiles or PowerProfiles is missing (SettingsView.swift or LoopKit Profiles files)"
+    fi
+
     if grep -q "DirectConnect_G7CGMManager" "Loop/Loop/Managers/CGMManager.swift"; then
         success "CGMManager.swift registers DirectConnect"
     else
@@ -2099,6 +2221,8 @@ rollback() {
         "Loop/Managers/DirectConnect/Crypto/micro-ecc" "Loop/Managers/DirectConnect/Crypto"
         "Loop/Managers/DirectConnect" "Loop/Resources/DirectConnect" "Loop/Views/DirectConnect"
         "Loop/Services/PowerPack" "Loop/Views/PowerPack"
+        "Loop/Models/PowerProfiles" "Loop/Services/PowerProfiles" "Loop/Views/PowerProfiles"
+        "Loop/View Models/PowerProfiles" "LoopTests/PowerProfiles" "Documentation/PowerProfiles"
         "Loop/View Models/FoodFinder" "Loop/View Models/LoopInsights"
         "LoopTests/FoodFinder" "LoopTests/LoopInsights" "LoopTests/DirectConnect" "LoopTests/PowerPack"
         "Documentation/FoodFinder" "Documentation/LoopInsights" "Documentation/DirectConnect"
@@ -2151,6 +2275,8 @@ rollback() {
 
     popd > /dev/null
 
+    rollback_profiles_loopkit
+
     echo ""
     echo -e "${GREEN}${BOLD}  Rollback complete. Your Loop is back to its previous state. You must rebuild now.${NC}"
     echo ""
@@ -2175,6 +2301,7 @@ do_install() {
     update_pbxproj
     replace_app_icon
     patch_loopkit
+    install_profiles_loopkit
     validate_installation
     cleanup
 }

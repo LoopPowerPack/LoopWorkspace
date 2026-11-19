@@ -10,7 +10,8 @@ USAGE
   --remove-features <ids>   Comma-separated feature ids to remove
 
   Feature ids: autopresets, bolus_pro, graph_detail_view, site_atlas,
-               food_finder, loop_insights, direct_connect, powerpack_shared
+               food_finder, loop_insights, direct_connect, powerpack_shared,
+               power_profiles
 
 EXAMPLES
   python3 update_pbxproj.py Loop/Loop.xcodeproj/project.pbxproj
@@ -61,6 +62,8 @@ ALL_FEATURE_IDS = (
     "direct_connect",
     # AI model search used by FoodFinder, LoopInsights and AutoPresets settings.
     "powerpack_shared",
+    # PowerProfiles: percentage changes to Profiles (Profiles itself lives in LoopKit).
+    "power_profiles",
 )
 
 # Loop target build setting DirectConnect needs: Swift calls its C P-256 arithmetic.
@@ -286,6 +289,16 @@ SOURCE_FILES: list[tuple[str, str, str, str]] = [
     ("Views/DirectConnect/DirectConnect_Tips.swift", "DirectConnect_Tips.swift", "Views/DirectConnect", "direct_connect"),
     ("Views/DirectConnect/DirectConnect_UICoordinator.swift", "DirectConnect_UICoordinator.swift", "Views/DirectConnect", "direct_connect"),
     ("Views/PowerPack/PowerPack_ModelFinderView.swift", "PowerPack_ModelFinderView.swift", "Views/PowerPack", "powerpack_shared"),
+
+    # ── PowerProfiles ──
+    ("Models/PowerProfiles/PowerProfiles_Models.swift",               "PowerProfiles_Models.swift",         "Models/PowerProfiles",      "power_profiles"),
+    ("Models/PowerProfiles/PowerProfiles_Scaler.swift",               "PowerProfiles_Scaler.swift",         "Models/PowerProfiles",      "power_profiles"),
+    ("Services/PowerProfiles/PowerProfiles_ProfileStore.swift",       "PowerProfiles_ProfileStore.swift",   "Services/PowerProfiles",    "power_profiles"),
+    ("Services/PowerProfiles/PowerProfiles_UndoStore.swift",          "PowerProfiles_UndoStore.swift",      "Services/PowerProfiles",    "power_profiles"),
+    ("Services/PowerProfiles/PowerProfiles_Coordinator.swift",        "PowerProfiles_Coordinator.swift",    "Services/PowerProfiles",    "power_profiles"),
+    ("View Models/PowerProfiles/PowerProfiles_ViewModel.swift",       "PowerProfiles_ViewModel.swift",      "View Models/PowerProfiles", "power_profiles"),
+    ("Views/PowerProfiles/PowerProfiles_View.swift",                  "PowerProfiles_View.swift",           "Views/PowerProfiles",       "power_profiles"),
+    ("Views/PowerProfiles/PowerProfiles_ProfilesPage.swift",          "PowerProfiles_ProfilesPage.swift",   "Views/PowerProfiles",       "power_profiles"),
 ]
 
 TEST_FILES: list[tuple[str, str, str, str]] = [
@@ -313,6 +326,10 @@ TEST_FILES: list[tuple[str, str, str, str]] = [
     ("BolusPro/BolusPro_SaveFailureAlertTests.swift", "BolusPro_SaveFailureAlertTests.swift", "LoopTests/BolusPro", "bolus_pro"),
     ("DataLayer/DataLayer_SettingsChangeEventsTests.swift", "DataLayer_SettingsChangeEventsTests.swift", "LoopTests/DataLayer", "loop_insights"),
     ("SiteAtlas/SiteAtlas_HistoryGroupingTests.swift", "SiteAtlas_HistoryGroupingTests.swift", "LoopTests/SiteAtlas", "site_atlas"),
+    ("PowerProfiles/PowerProfiles_ModelsTests.swift",       "PowerProfiles_ModelsTests.swift",       "LoopTests/PowerProfiles", "power_profiles"),
+    ("PowerProfiles/PowerProfiles_ScalerTests.swift",       "PowerProfiles_ScalerTests.swift",       "LoopTests/PowerProfiles", "power_profiles"),
+    ("PowerProfiles/PowerProfiles_ProfileStoreTests.swift", "PowerProfiles_ProfileStoreTests.swift", "LoopTests/PowerProfiles", "power_profiles"),
+    ("PowerProfiles/PowerProfiles_UndoTests.swift",         "PowerProfiles_UndoTests.swift",         "LoopTests/PowerProfiles", "power_profiles"),
 ]
 
 # (group_key, display_name, path, parent_group_key, owning_feature_or_None)
@@ -380,6 +397,13 @@ SUBGROUPS: list[tuple[str, str, str, str, Optional[str]]] = [
     ("Services/PowerPack",      "PowerPack",     "PowerPack",     "Services",   "powerpack_shared"),
     ("Views/PowerPack",         "PowerPack",     "PowerPack",     "Views",      "powerpack_shared"),
     ("LoopTests/PowerPack",     "PowerPack",     "PowerPack",     "LoopTests",  "powerpack_shared"),
+
+    # PowerProfiles subgroups
+    ("Models/PowerProfiles",      "PowerProfiles", "PowerProfiles", "Models",      "power_profiles"),
+    ("Services/PowerProfiles",    "PowerProfiles", "PowerProfiles", "Services",    "power_profiles"),
+    ("View Models/PowerProfiles", "PowerProfiles", "PowerProfiles", "View Models", "power_profiles"),
+    ("Views/PowerProfiles",       "PowerProfiles", "PowerProfiles", "Views",       "power_profiles"),
+    ("LoopTests/PowerProfiles",   "PowerProfiles", "PowerProfiles", "LoopTests",   "power_profiles"),
 ]
 
 
